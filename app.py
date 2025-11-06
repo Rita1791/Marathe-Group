@@ -7,7 +7,6 @@ Original file is located at
     https://colab.research.google.com/drive/1uY7I1j39TUhFbVsYwe2z4reD1UScrlE0
 """
 
-!pip install streamlit pyngrok pandas requests
 
 # Commented out IPython magic to ensure Python compatibility.
 # %%writefile app.py
