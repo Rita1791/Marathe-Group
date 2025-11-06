@@ -7,21 +7,29 @@ import os
 st.set_page_config(page_title="Marathe Group", page_icon="🏢", layout="wide")
 
 # ----------------- HEADER -----------------
-st.markdown("<h1 style='text-align:center;'>🏢 Marathe Group</h1>", unsafe_allow_html=True)
-st.markdown("<h4 style='text-align:center;color:gray;'>Luxury Living • Trusted Legacy</h4>", unsafe_allow_html=True)
-st.image("https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1600&q=80",
-         use_column_width=True, caption="Building Dreams Since 1995")
+st.markdown("""
+    <div style="text-align:center;">
+        <h1>🏢 Marathe Group</h1>
+        <h4 style="color:gray;">Luxury Living • Trusted Legacy</h4>
+    </div>
+""", unsafe_allow_html=True)
+st.image(
+    "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1600&q=80",
+    use_column_width=True,
+    caption="Building Dreams Since 1995"
+)
 st.markdown("---")
 
 # ----------------- MISSION & VISION -----------------
-st.markdown("## 🌟 Our Mission & Vision")
 st.markdown("""
-### 🏗️ **Mission**
-To build homes that redefine comfort and deliver unmatched value through trust, transparency, and excellence in every detail.  
-
-### 🌍 **Vision**
-To emerge as a leading name in India’s real estate sector by crafting iconic developments that inspire confidence and elevate modern living experiences.
-""")
+    <h2 style="text-align:center;">🌟 Our Mission & Vision</h2>
+    <div style="background-color:#f9f9f9;padding:20px;border-radius:10px;">
+        <h4>🏗️ <b>Mission</b></h4>
+        <p>To build homes that redefine comfort and deliver unmatched value through trust, transparency, and excellence in every detail.</p>
+        <h4>🌍 <b>Vision</b></h4>
+        <p>To emerge as a leading name in India’s real estate sector by crafting iconic developments that inspire confidence and elevate modern living experiences.</p>
+    </div>
+""", unsafe_allow_html=True)
 st.markdown("---")
 
 # ----------------- PROJECT DATA -----------------
@@ -72,25 +80,31 @@ completed_projects = [
      "image": "https://github.com/Rita1791/Marathe-Group/blob/main/images/Marathe%20Elenza.jpeg?raw=true"},
 ]
 
-# ----------------- TABS -----------------
-tab1, tab2, tab3, tab4 = st.tabs(["🏗️ Ongoing Projects", "🏠 Completed Projects", "📝 Enquiry Form", "📞 Contact Info"])
+# ----------------- MAIN TABS -----------------
+tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
+    "🏗️ Ongoing Projects", 
+    "🏠 Completed Projects", 
+    "📝 Enquiry Form", 
+    "📞 Contact Info", 
+    "🧑‍💼 Admin Portal", 
+    "👤 Customer Portal"
+])
 
 # ----------------- ONGOING PROJECTS -----------------
 with tab1:
-    st.subheader("Ongoing Projects")
+    st.subheader("🏗️ Ongoing Projects")
     for name, data in projects.items():
         st.image(data["image"], caption=name, use_column_width=True)
         st.markdown(f"🏢 **Project:** {name}  \n📍 **Location:** {data['location']}  \n🏠 **Address:** {data['address']}")
         st.markdown("### 🏡 Available Flats:")
         for flat in data["flats"]:
-            with st.container():
-                st.image(flat["image"], caption=f"{flat['type']} - {flat['area']} - {flat['price']} ({flat['status']})",
-                         use_column_width=True)
+            st.image(flat["image"], caption=f"{flat['type']} - {flat['area']} - {flat['price']} ({flat['status']})",
+                     use_column_width=True)
         st.markdown("---")
 
 # ----------------- COMPLETED PROJECTS -----------------
 with tab2:
-    st.subheader("Completed Projects")
+    st.subheader("🏠 Completed Projects")
     for p in completed_projects:
         st.image(p["image"], caption=p["name"], use_column_width=True)
         st.markdown(f"🏢 **Project:** {p['name']}  \n📍 **Location:** {p['location']}  \n🏠 **Address:** {p['address']}")
@@ -98,70 +112,118 @@ with tab2:
 
 # ----------------- ENQUIRY FORM -----------------
 with tab3:
-    st.subheader("Flat Enquiry Form 🏡")
+    st.subheader("📝 Flat Enquiry Form")
     st.write("Please fill the form below and our team will contact you soon:")
 
     excel_path = "enquiries.xlsx"
     if not os.path.exists(excel_path):
-        df = pd.DataFrame(columns=["Name", "Phone", "Project", "Message", "Timestamp"])
-        df.to_excel(excel_path, index=False)
+        pd.DataFrame(columns=["Name", "Phone", "Project", "Message", "Timestamp"]).to_excel(excel_path, index=False)
 
     with st.form("enquiry_form"):
         name = st.text_input("Full Name")
         phone = st.text_input("Phone Number")
         project = st.selectbox("Select Project", list(projects.keys()) + [p["name"] for p in completed_projects])
         message = st.text_area("Additional Message (optional)")
-        submit = st.form_submit_button("Submit")
+        submit = st.form_submit_button("Submit Enquiry")
 
         if submit:
             if name and phone:
-                new_entry = pd.DataFrame({
-                    "Name": [name],
-                    "Phone": [phone],
-                    "Project": [project],
-                    "Message": [message],
-                    "Timestamp": [datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")]
-                })
                 df = pd.read_excel(excel_path)
+                new_entry = pd.DataFrame([[name, phone, project, message, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")]],
+                                         columns=df.columns)
                 df = pd.concat([df, new_entry], ignore_index=True)
                 df.to_excel(excel_path, index=False)
                 st.success(f"✅ Thank you {name}! Your enquiry for **{project}** has been recorded.")
             else:
-                st.error("Please enter both Name and Phone Number.")
+                st.error("⚠️ Please enter both Name and Phone Number.")
 
-    # ----------------- SECURE ADMIN DOWNLOAD SECTION -----------------
+    # Secure download section for admin
     st.markdown("---")
     st.markdown("<h3 style='text-align:center;'>🔐 Admin Access - Enquiry Records</h3>", unsafe_allow_html=True)
-    st.write("Only authorized personnel can download the enquiry file for internal use.")
-
-    with st.container():
-        admin_pass = st.text_input("Enter Admin Password:", type="password", key="admin_pass")
-
-        # Password verification
-        if admin_pass == "Marathe@Admin2025":  # ✅ Set your private admin password here
-            if os.path.exists(excel_path):
-                st.success("✅ Access granted. You may download the file below.")
-                with open(excel_path, "rb") as f:
-                    st.download_button(
-                        label="📥 Download Enquiries Excel File",
-                        data=f,
-                        file_name="enquiries.xlsx",
-                        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                    )
-        elif admin_pass != "":
-            st.error("❌ Incorrect password. Access denied.")
-        else:
-            st.info("Please enter your admin password to access the download file.")
+    admin_pass = st.text_input("Enter Admin Password:", type="password")
+    if admin_pass == "Marathe@Admin2025":
+        with open(excel_path, "rb") as f:
+            st.download_button("📥 Download Enquiries Excel File", f, file_name="enquiries.xlsx")
+    elif admin_pass != "":
+        st.error("❌ Incorrect password.")
 
 # ----------------- CONTACT INFO -----------------
 with tab4:
-    st.subheader("Contact Information")
+    st.subheader("📞 Contact Information")
     st.markdown("""  
     ⏰ **Working Hours:** 10:00 AM – 07:00 PM (Mon – Sun)  
     📞 **Contact Number:** +91 7045871101  
     💬 **WhatsApp:** [Chat Now](https://wa.me/917045871101)  
     ✉️ **Email:** marathegroup1101@gmail.com  
-    👤 **Owner:** Parasana Marathe  
-    👥 **Manager:**  Padma Rawat
+    👤 **Owner:** Parasana Ramesh Marathe  
+    👥 **Manager:**  Padma Rajendra Rawat  
     """)
     st.caption("© 2025 Marathe Group | Designed and Developed by Ritika Rawat 💻")
+
+# ----------------- ADMIN PORTAL -----------------
+with tab5:
+    st.subheader("🧑‍💼 Admin Portal")
+    admin_data_path = "admin_users.xlsx"
+    if not os.path.exists(admin_data_path):
+        pd.DataFrame(columns=["Name", "Email", "Password", "Approved"]).to_excel(admin_data_path, index=False)
+
+    action = st.radio("Choose Action", ["Login", "Register"])
+    if action == "Register":
+        name = st.text_input("Full Name")
+        email = st.text_input("Official Email")
+        password = st.text_input("Set Password", type="password")
+        if st.button("Register Admin"):
+            df = pd.read_excel(admin_data_path)
+            df.loc[len(df)] = [name, email, password, "Pending"]
+            df.to_excel(admin_data_path, index=False)
+            st.success("✅ Registration submitted for verification.")
+    else:
+        email = st.text_input("Email ID")
+        password = st.text_input("Password", type="password")
+        if st.button("Login"):
+            df = pd.read_excel(admin_data_path)
+            user = df[(df["Email"] == email) & (df["Password"] == password)]
+            if not user.empty:
+                if user["Approved"].iloc[0] == "Yes":
+                    st.success(f"Welcome {user['Name'].iloc[0]}!")
+                    with open(excel_path, "rb") as f:
+                        st.download_button("📥 Download Enquiries Excel", f, file_name="enquiries.xlsx")
+                else:
+                    st.warning("⏳ Verification pending from office.")
+            else:
+                st.error("❌ Invalid credentials.")
+
+# ----------------- CUSTOMER PORTAL -----------------
+with tab6:
+    st.subheader("👤 Customer Portal")
+    cust_data_path = "customer_users.xlsx"
+    if not os.path.exists(cust_data_path):
+        pd.DataFrame(columns=["Name", "Email", "Password", "Project", "Approved"]).to_excel(cust_data_path, index=False)
+
+    action2 = st.radio("Choose Action", ["Login", "Register"], key="cust_action")
+    if action2 == "Register":
+        name = st.text_input("Full Name")
+        email = st.text_input("Email ID")
+        password = st.text_input("Set Password", type="password")
+        project = st.selectbox("Your Project", list(projects.keys()) + [p["name"] for p in completed_projects])
+        if st.button("Register Customer"):
+            df = pd.read_excel(cust_data_path)
+            df.loc[len(df)] = [name, email, password, project, "Pending"]
+            df.to_excel(cust_data_path, index=False)
+            st.success("✅ Registration submitted! Office will verify soon.")
+    else:
+        email = st.text_input("Email")
+        password = st.text_input("Password", type="password")
+        if st.button("Login"):
+            df = pd.read_excel(cust_data_path)
+            user = df[(df["Email"] == email) & (df["Password"] == password)]
+            if not user.empty:
+                if user["Approved"].iloc[0] == "Yes":
+                    st.success(f"Welcome {user['Name'].iloc[0]}! 👋")
+                    st.write(f"🏢 Project: {user['Project'].iloc[0]}")
+                    st.markdown("📄 [View Sample Payment Receipt](https://example.com/payment-receipt.pdf)")
+                    st.markdown("📄 [View Sample Registration Document](https://example.com/registration.pdf)")
+                else:
+                    st.warning("⏳ Your registration is pending approval.")
+            else:
+                st.error("❌ Invalid login credentials.")
