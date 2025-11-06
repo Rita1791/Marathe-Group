@@ -129,17 +129,29 @@ with tab3:
             else:
                 st.error("Please enter both Name and Phone Number.")
 
-    # Secure download access
-st.markdown("### 🔒 Admin Access Only")
-admin_pass = st.text_input("Enter Admin Password:", type="password")
+    # ----------------- SECURE ADMIN DOWNLOAD SECTION -----------------
+    st.markdown("---")
+    st.markdown("<h3 style='text-align:center;'>🔐 Admin Access - Enquiry Records</h3>", unsafe_allow_html=True)
+    st.write("Only authorized personnel can download the enquiry file for internal use.")
 
-if admin_pass == "Marathe@Admin2025":  # You can change this password
-    if os.path.exists(excel_path):
-        with open(excel_path, "rb") as f:
-            st.download_button("📥 Download Enquiries Excel File", f, file_name="enquiries.xlsx")
-else:
-    if admin_pass != "":
-        st.error("❌ Incorrect password. Access denied.")
+    with st.container():
+        admin_pass = st.text_input("Enter Admin Password:", type="password", key="admin_pass")
+
+        # Password verification
+        if admin_pass == "Marathe@Admin2025":  # ✅ Set your private admin password here
+            if os.path.exists(excel_path):
+                st.success("✅ Access granted. You may download the file below.")
+                with open(excel_path, "rb") as f:
+                    st.download_button(
+                        label="📥 Download Enquiries Excel File",
+                        data=f,
+                        file_name="enquiries.xlsx",
+                        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                    )
+        elif admin_pass != "":
+            st.error("❌ Incorrect password. Access denied.")
+        else:
+            st.info("Please enter your admin password to access the download file.")
 
 # ----------------- CONTACT INFO -----------------
 with tab4:
