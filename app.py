@@ -142,6 +142,4 @@ import os
 #     st.caption("© 2025 Marathe Group | Designed by Ritika Rawat 💻")
 #
 
-ngrok config add-authtoken "350Rg7TCOhB6kzQUKbWEmXSnMv5_6efKRtXMmnohnjTUdXSum"
-
 
