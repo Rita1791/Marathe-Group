@@ -129,9 +129,17 @@ with tab3:
             else:
                 st.error("Please enter both Name and Phone Number.")
 
+    # Secure download access
+st.markdown("### 🔒 Admin Access Only")
+admin_pass = st.text_input("Enter Admin Password:", type="password")
+
+if admin_pass == "Marathe@Admin2025":  # You can change this password
     if os.path.exists(excel_path):
         with open(excel_path, "rb") as f:
             st.download_button("📥 Download Enquiries Excel File", f, file_name="enquiries.xlsx")
+else:
+    if admin_pass != "":
+        st.error("❌ Incorrect password. Access denied.")
 
 # ----------------- CONTACT INFO -----------------
 with tab4:
