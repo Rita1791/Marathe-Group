@@ -29,7 +29,7 @@ projects = {
     "Marathe Sapphire": {
         "location": "Titwala (E)",
         "address": "Swami Vivekanand Chowk Road, Titwala East, Maharashtra",
-        "image": "https://raw.githubusercontent.com/Rita1791/Marathe-Group/main/images/marathe_sapphire.jpg",
+        "image": "https://raw.githubusercontent.com/Rita1791/Marathe-Group/refs/heads/main/images/Marathe%20Sapphire.avif",
         "flats": [
             {"type": "1 BHK", "area": "650 sq.ft", "price": "₹35 Lakh", "status": "Available",
              "image": "https://images.unsplash.com/photo-1600566753190-17f2ba1b3b69?auto=format&fit=crop&w=1000&q=80"},
@@ -40,7 +40,7 @@ projects = {
     "Marathe Tower": {
         "location": "Titwala (E)",
         "address": "Digi1 Road, Titwala East, Maharashtra",
-        "image": "https://raw.githubusercontent.com/Rita1791/Marathe-Group/main/images/marathe_tower.jpg",
+        "image": "https://github.com/Rita1791/Marathe-Group/blob/main/images/Marathe%20Tower.jpg?raw=true",
         "flats": [
             {"type": "1 BHK", "area": "620 sq.ft", "price": "₹33 Lakh", "status": "Sold",
              "image": "https://images.unsplash.com/photo-1598300042247-c95c6d3e0f9d?auto=format&fit=crop&w=1000&q=80"},
@@ -51,7 +51,7 @@ projects = {
     "Marathe Pride": {
         "location": "Ambernath (E)",
         "address": "Plot No. 220 & 221, Ambernath East, Maharashtra",
-        "image": "https://raw.githubusercontent.com/Rita1791/Marathe-Group/main/images/marathe_pride.jpg",
+        "image": "https://raw.githubusercontent.com/Rita1791/Marathe-Group/refs/heads/main/images/Marathe%20Pride.avif",
         "flats": [
             {"type": "1 BHK", "area": "640 sq.ft", "price": "₹34 Lakh", "status": "Available",
              "image": "https://images.unsplash.com/photo-1600607687920-4e24d07d1c07?auto=format&fit=crop&w=1000&q=80"},
@@ -61,15 +61,15 @@ projects = {
 
 completed_projects = [
     {"name": "Marathe Empress", "location": "Titwala (E)", "address": "Jagat Naka, Titwala East, Maharashtra",
-     "image": "https://raw.githubusercontent.com/Rita1791/Marathe-Group/main/images/marathe_empress.jpg"},
+     "image": "https://github.com/Rita1791/Marathe-Group/blob/main/images/Marathe%20Empress.webp?raw=true"},
     {"name": "Marathe Height", "location": "Titwala (E)", "address": "Near Ghar Aangan, Titwala East, Maharashtra",
-     "image": "https://raw.githubusercontent.com/Rita1791/Marathe-Group/main/images/marathe_height.jpg"},
+     "image": "https://github.com/Rita1791/Marathe-Group/blob/main/images/marathe%20Height.png?raw=true"},
     {"name": "Marathe Fortune", "location": "Titwala (E)", "address": "Ganesh Mandir Road, Titwala East, Maharashtra",
-     "image": "https://raw.githubusercontent.com/Rita1791/Marathe-Group/main/images/marathe_fortune.jpg"},
+     "image": "https://raw.githubusercontent.com/Rita1791/Marathe-Group/refs/heads/main/images/Marathe%20Fortune.avif"},
     {"name": "Marathe Empire", "location": "Titwala (E)", "address": "Near Mahaganpati Hospital, Titwala East, Maharashtra",
-     "image": "https://raw.githubusercontent.com/Rita1791/Marathe-Group/main/images/marathe_empire.jpg"},
+     "image": "https://github.com/Rita1791/Marathe-Group/blob/main/images/Marathe%20Empire.jpg?raw=true"},
     {"name": "Marathe Elenza", "location": "Shahad (W)", "address": "Sales Office, Shahad West, Maharashtra",
-     "image": "https://raw.githubusercontent.com/Rita1791/Marathe-Group/main/images/marathe_elenza.jpg"},
+     "image": "https://github.com/Rita1791/Marathe-Group/blob/main/images/Marathe%20Elenza.jpeg?raw=true"},
 ]
 
 # ----------------- TABS -----------------
