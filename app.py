@@ -167,31 +167,33 @@ with tab5:
     if not os.path.exists(admin_data_path):
         pd.DataFrame(columns=["Name", "Email", "Password", "Approved"]).to_excel(admin_data_path, index=False)
 
-    action = st.radio("Choose Action", ["Login", "Register"])
+    action = st.radio("Choose Action", ["Login", "Register"], key="admin_action")
     if action == "Register":
-        name = st.text_input("Full Name")
-        email = st.text_input("Official Email")
-        password = st.text_input("Set Password", type="password")
-        if st.button("Register Admin"):
+        name = st.text_input("Full Name", key="admin_name")
+        email = st.text_input("Official Email", key="admin_email")
+        password = st.text_input("Set Password", type="password", key="admin_password")
+        if st.button("Register Admin", key="admin_register"):
             df = pd.read_excel(admin_data_path)
             df.loc[len(df)] = [name, email, password, "Pending"]
             df.to_excel(admin_data_path, index=False)
             st.success("✅ Registration submitted for verification.")
     else:
-        email = st.text_input("Email ID")
-        password = st.text_input("Password", type="password")
-        if st.button("Login"):
+        email = st.text_input("Email ID", key="admin_login_email")
+        password = st.text_input("Password", type="password", key="admin_login_password")
+        if st.button("Login", key="admin_login_btn"):
             df = pd.read_excel(admin_data_path)
             user = df[(df["Email"] == email) & (df["Password"] == password)]
             if not user.empty:
                 if user["Approved"].iloc[0] == "Yes":
                     st.success(f"Welcome {user['Name'].iloc[0]}!")
-                    with open(excel_path, "rb") as f:
-                        st.download_button("📥 Download Enquiries Excel", f, file_name="enquiries.xlsx")
+                    if os.path.exists("enquiries.xlsx"):
+                        with open("enquiries.xlsx", "rb") as f:
+                            st.download_button("📥 Download Enquiries Excel", f, file_name="enquiries.xlsx", key="admin_download")
                 else:
                     st.warning("⏳ Verification pending from office.")
             else:
                 st.error("❌ Invalid credentials.")
+
 
 # ----------------- CUSTOMER PORTAL -----------------
 with tab6:
@@ -202,19 +204,19 @@ with tab6:
 
     action2 = st.radio("Choose Action", ["Login", "Register"], key="cust_action")
     if action2 == "Register":
-        name = st.text_input("Full Name")
-        email = st.text_input("Email ID")
-        password = st.text_input("Set Password", type="password")
-        project = st.selectbox("Your Project", list(projects.keys()) + [p["name"] for p in completed_projects])
-        if st.button("Register Customer"):
+        name = st.text_input("Full Name", key="cust_name")
+        email = st.text_input("Email ID", key="cust_email")
+        password = st.text_input("Set Password", type="password", key="cust_password")
+        project = st.selectbox("Your Project", list(projects.keys()) + [p["name"] for p in completed_projects], key="cust_project")
+        if st.button("Register Customer", key="cust_register_btn"):
             df = pd.read_excel(cust_data_path)
             df.loc[len(df)] = [name, email, password, project, "Pending"]
             df.to_excel(cust_data_path, index=False)
             st.success("✅ Registration submitted! Office will verify soon.")
     else:
-        email = st.text_input("Email")
-        password = st.text_input("Password", type="password")
-        if st.button("Login"):
+        email = st.text_input("Email", key="cust_login_email")
+        password = st.text_input("Password", type="password", key="cust_login_password")
+        if st.button("Login", key="cust_login_btn"):
             df = pd.read_excel(cust_data_path)
             user = df[(df["Email"] == email) & (df["Password"] == password)]
             if not user.empty:
