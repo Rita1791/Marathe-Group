@@ -144,8 +144,4 @@ import os
 
 ngrok config add-authtoken "350Rg7TCOhB6kzQUKbWEmXSnMv5_6efKRtXMmnohnjTUdXSum"
 
-from pyngrok import ngrok
-public_url = ngrok.connect(8501)
-print("🌍 Your Marathe Group website is live at:")
-print(public_url)
-!streamlit run app.py --server.port 8501 &> /dev/null &
+
