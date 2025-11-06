@@ -22,13 +22,58 @@ st.markdown("---")
 
 # ----------------- MISSION & VISION -----------------
 st.markdown("""
-    <h2 style="text-align:center;">🌟 Our Mission & Vision</h2>
-    <div style="background-color:#f9f9f9;padding:20px;border-radius:10px;">
-        <h4>🏗️ <b>Mission</b></h4>
-        <p>To build homes that redefine comfort and deliver unmatched value through trust, transparency, and excellence in every detail.</p>
-        <h4>🌍 <b>Vision</b></h4>
-        <p>To emerge as a leading name in India’s real estate sector by crafting iconic developments that inspire confidence and elevate modern living experiences.</p>
+<style>
+.mission-vision-box {
+    background: linear-gradient(135deg, #1f1f1f, #2a2a2a);
+    padding: 40px;
+    border-radius: 15px;
+    color: white;
+    box-shadow: 0px 0px 20px rgba(255, 215, 0, 0.3);
+    border: 1px solid rgba(255, 215, 0, 0.4);
+    transition: all 0.3s ease-in-out;
+}
+.mission-vision-box:hover {
+    transform: scale(1.01);
+    box-shadow: 0px 0px 30px rgba(255, 215, 0, 0.5);
+}
+.mission-title {
+    color: #FFD700;
+    font-size: 28px;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 10px;
+}
+.mission-text {
+    font-size: 18px;
+    color: #f0f0f0;
+    text-align: justify;
+    line-height: 1.6;
+}
+.icon {
+    font-size: 35px;
+    text-align: center;
+    display: block;
+    margin-bottom: 10px;
+}
+</style>
+
+<h2 style="text-align:center; color:#FFD700;">🌟 Our Mission & Vision</h2>
+
+<div class="mission-vision-box">
+    <div class="icon">🏗️</div>
+    <div class="mission-title">Our Mission</div>
+    <div class="mission-text">
+        To build homes that redefine comfort, quality, and elegance — delivering unmatched value through trust, innovation, and transparency. 
+        Every project we create blends design excellence with long-lasting craftsmanship for families to cherish for generations.
     </div>
+    <br>
+    <div class="icon">🌍</div>
+    <div class="mission-title">Our Vision</div>
+    <div class="mission-text">
+        To become a name synonymous with trust and excellence in India’s real estate sector by crafting landmark spaces that enrich lives, 
+        inspire communities, and reflect modern living with a timeless essence.
+    </div>
+</div>
 """, unsafe_allow_html=True)
 st.markdown("---")
 
