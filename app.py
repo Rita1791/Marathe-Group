@@ -9,6 +9,7 @@ st.set_page_config(page_title="Marathe Group", page_icon="🏢", layout="wide")
 # ----------------- HEADER -----------------
 st.markdown("""
     <div style="text-align:center;">
+        <img src="https://github.com/Rita1791/Marathe-Group/blob/main/images/Marathe%20Group%20Logo.webp?raw=true" width="220">
         <h1>🏢 Marathe Group</h1>
         <h4 style="color:gray;">Luxury Living • Trusted Legacy</h4>
     </div>
@@ -16,8 +17,51 @@ st.markdown("""
 st.image(
     "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1600&q=80",
     use_column_width=True,
-    caption="Building Dreams Since 1995"
+    caption="Building Dreams Since 1985"
 )
+st.markdown("---")
+
+# ----------------- MARATHE ELENZA PROMO SECTION -----------------
+st.markdown("""
+<style>
+.home-section {
+    text-align: center;
+    padding: 30px 0;
+}
+.video-box {
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0px 4px 25px rgba(255, 215, 0, 0.4);
+    margin-top: 15px;
+}
+.audio-player {
+    display: none;
+}
+.fadeIn {
+    animation: fadeIn 2s ease-in-out;
+}
+@keyframes fadeIn {
+    from {opacity: 0;}
+    to {opacity: 1;}
+}
+</style>
+""", unsafe_allow_html=True)
+
+st.markdown("""
+<div class="home-section fadeIn">
+    <h2 style="color:#FFD700;">✨ Marathe Elenza — Elevating Luxury Living ✨</h2>
+    <div class="video-box">
+        <video width="100%" height="auto" autoplay loop muted playsinline>
+            <source src="https://github.com/Rita1791/Marathe-Group/raw/refs/heads/main/images/MG%20Video.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+    </div>
+    <audio autoplay loop class="audio-player">
+        <source src="https://cdn.pixabay.com/audio/2022/02/15/audio_28a23d0e8b.mp3" type="audio/mpeg">
+    </audio>
+</div>
+""", unsafe_allow_html=True)
+
 st.markdown("---")
 
 # ----------------- MISSION & VISION -----------------
@@ -30,11 +74,6 @@ st.markdown("""
     color: white;
     box-shadow: 0px 0px 20px rgba(255, 215, 0, 0.3);
     border: 1px solid rgba(255, 215, 0, 0.4);
-    transition: all 0.3s ease-in-out;
-}
-.mission-vision-box:hover {
-    transform: scale(1.01);
-    box-shadow: 0px 0px 30px rgba(255, 215, 0, 0.5);
 }
 .mission-title {
     color: #FFD700;
@@ -133,7 +172,7 @@ completed_projects = [
      ]},
 ]
 
-# ----------------- CUSTOM STYLING -----------------
+# ----------------- STYLING FOR FLAT CARDS -----------------
 st.markdown("""
 <style>
 .flat-card {
@@ -157,19 +196,6 @@ st.markdown("""
 .flat-price {
     font-size: 18px;
     color: #ffffff;
-}
-.book-btn {
-    background-color: #FFD700;
-    color: black;
-    font-weight: bold;
-    border: none;
-    border-radius: 10px;
-    padding: 10px 20px;
-    margin-top: 15px;
-}
-.book-btn:hover {
-    background-color: #e6c200;
-    color: black;
 }
 </style>
 """, unsafe_allow_html=True)
