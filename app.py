@@ -147,6 +147,10 @@ completed_projects = [
      "image": "https://github.com/Rita1791/Marathe-Group/blob/main/images/Marathe%20Empress.webp?raw=true"},
 ]
 
+# Track selected project (for Book Now)
+if "selected_project" not in st.session_state:
+    st.session_state.selected_project = None
+
 # ----------------- MAIN TABS -----------------
 tab1, tab2, tab3, tab4 = st.tabs(["🏗️ Ongoing Projects", "🏠 Completed Projects", "📝 Enquiry Form", "📞 Contact Info"])
 
@@ -162,6 +166,12 @@ with tab1:
         st.markdown("### 🏡 Available Flats:")
         for flat in data["flats"]:
             st.markdown(f"• {flat['type']} — {flat['area']} — {flat['price']} ({flat['status']})")
+
+        # Book Now Button
+        if st.button(f"💛 Book Now at {name}", key=f"book_{name}"):
+            st.session_state.selected_project = name
+            st.success(f"Redirected to Enquiry Form for {name}")
+
         st.markdown("---")
 
 # ----------------- COMPLETED PROJECTS -----------------
@@ -188,18 +198,19 @@ with tab3:
     if not os.path.exists(excel_path):
         pd.DataFrame(columns=["Name","Phone","Project","Message","Timestamp"]).to_excel(excel_path, index=False)
 
+    default_project = st.session_state.selected_project if st.session_state.selected_project else list(projects.keys())[0]
+
     with st.form("enquiry_form"):
         name = st.text_input("Full Name")
         phone = st.text_input("Phone Number")
-        project = st.selectbox("Select Project", list(projects.keys()) + [p["name"] for p in completed_projects])
+        project = st.selectbox("Select Project", list(projects.keys()) + [p["name"] for p in completed_projects], index=list(projects.keys()).index(default_project) if default_project in projects else 0)
         message = st.text_area("Additional Message (optional)")
         submit = st.form_submit_button("Submit Enquiry")
 
         if submit:
             if name and phone:
                 df = pd.read_excel(excel_path)
-                new_entry = pd.DataFrame([[name, phone, project, message,
-                                           datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")]], columns=df.columns)
+                new_entry = pd.DataFrame([[name, phone, project, message, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")]], columns=df.columns)
                 df = pd.concat([df, new_entry], ignore_index=True)
                 df.to_excel(excel_path, index=False)
                 st.success(f"✅ Thank you {name}! Your enquiry for **{project}** has been recorded.")
