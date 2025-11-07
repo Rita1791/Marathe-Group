@@ -9,7 +9,7 @@ st.set_page_config(page_title="Marathe Group", page_icon="🏢", layout="wide")
 # ----------------- HEADER -----------------
 st.markdown("""
     <div style="text-align:center;">
-        <img src="https://github.com/Rita1791/Marathe-Group/blob/main/images/Marathe%20Group%20Logo.webp?raw=true" width="220">
+        <img src="https://raw.githubusercontent.com/Rita1791/Marathe-Group/main/images/Marathe_Group_Logo.webp" width="220">
         <h1>🏢 Marathe Group</h1>
         <h4 style="color:gray;">Luxury Living • Trusted Legacy</h4>
     </div>
@@ -52,7 +52,7 @@ st.markdown("""
     <h2 style="color:#FFD700;">✨ Marathe Elenza — Elevating Luxury Living ✨</h2>
     <div class="video-box">
         <video width="100%" height="auto" autoplay loop muted playsinline>
-            <source src="https://github.com/Rita1791/Marathe-Group/raw/refs/heads/main/images/MG%20Video.mp4" type="video/mp4">
+            <source src="https://raw.githubusercontent.com/Rita1791/Marathe-Group/main/images/MG_Video.mp4" type="video/mp4">
             Your browser does not support the video tag.
         </video>
     </div>
@@ -151,18 +151,6 @@ projects = {
 }
 
 completed_projects = [
-    {"name": "Marathe Empress", "location": "Titwala (E)", "address": "Jagat Naka, Titwala East, Maharashtra",
-     "map_link": "https://www.google.com/maps?q=Marathe+Empress+Titwala",
-     "image": "https://github.com/Rita1791/Marathe-Group/blob/main/images/Marathe%20Empress.webp?raw=true"},
-    {"name": "Marathe Height", "location": "Titwala (E)", "address": "Near Ghar Aangan, Titwala East, Maharashtra",
-     "map_link": "https://www.google.com/maps?q=Marathe+Height+Titwala",
-     "image": "https://github.com/Rita1791/Marathe-Group/blob/main/images/marathe%20Height.png?raw=true"},
-    {"name": "Marathe Fortune", "location": "Titwala (E)", "address": "Ganesh Mandir Road, Titwala East, Maharashtra",
-     "map_link": "https://www.google.com/maps?q=Marathe+Fortune+Titwala",
-     "image": "https://raw.githubusercontent.com/Rita1791/Marathe-Group/refs/heads/main/images/Marathe%20Fortune.avif"},
-    {"name": "Marathe Empire", "location": "Titwala (E)", "address": "Near Mahaganpati Hospital, Titwala East, Maharashtra",
-     "map_link": "https://www.google.com/maps?q=Marathe+Empire+Titwala",
-     "image": "https://github.com/Rita1791/Marathe-Group/blob/main/images/Marathe%20Empire.jpg?raw=true"},
     {"name": "Marathe Elenza", "location": "Shahad (W)", "address": "Sales Office, Shahad West, Maharashtra",
      "map_link": "https://www.google.com/maps?q=Marathe+Elenza+Shahad",
      "image": "https://github.com/Rita1791/Marathe-Group/blob/main/images/Marathe%20Elenza.jpeg?raw=true",
@@ -170,35 +158,19 @@ completed_projects = [
         {"type": "2 BHK", "area": "1100 sq.ft", "price": "₹90 Lakh", "status": "Available"},
         {"type": "3 BHK", "area": "1450 sq.ft", "price": "₹1.2 Crore", "status": "Available"},
      ]},
+    {"name": "Marathe Empire", "location": "Titwala (E)", "address": "Near Mahaganpati Hospital, Titwala East, Maharashtra",
+     "map_link": "https://www.google.com/maps?q=Marathe+Empire+Titwala",
+     "image": "https://github.com/Rita1791/Marathe-Group/blob/main/images/Marathe%20Empire.jpg?raw=true"},
+    {"name": "Marathe Height", "location": "Titwala (E)", "address": "Near Ghar Aangan, Titwala East, Maharashtra",
+     "map_link": "https://www.google.com/maps?q=Marathe+Height+Titwala",
+     "image": "https://github.com/Rita1791/Marathe-Group/blob/main/images/marathe%20Height.png?raw=true"},
+    {"name": "Marathe Fortune", "location": "Titwala (E)", "address": "Ganesh Mandir Road, Titwala East, Maharashtra",
+     "map_link": "https://www.google.com/maps?q=Marathe+Fortune+Titwala",
+     "image": "https://raw.githubusercontent.com/Rita1791/Marathe-Group/refs/heads/main/images/Marathe%20Fortune.avif"},
+    {"name": "Marathe Empress", "location": "Titwala (E)", "address": "Jagat Naka, Titwala East, Maharashtra",
+     "map_link": "https://www.google.com/maps?q=Marathe+Empress+Titwala",
+     "image": "https://github.com/Rita1791/Marathe-Group/blob/main/images/Marathe%20Empress.webp?raw=true"},
 ]
-
-# ----------------- STYLING FOR FLAT CARDS -----------------
-st.markdown("""
-<style>
-.flat-card {
-    background: linear-gradient(135deg, #2d2d2d, #1e1e1e);
-    padding: 20px;
-    border-radius: 15px;
-    margin: 10px 0;
-    box-shadow: 0px 0px 15px rgba(255, 215, 0, 0.3);
-    color: white;
-    transition: all 0.3s ease-in-out;
-}
-.flat-card:hover {
-    transform: scale(1.02);
-    box-shadow: 0px 0px 25px rgba(255, 215, 0, 0.6);
-}
-.flat-type {
-    font-size: 22px;
-    font-weight: bold;
-    color: #FFD700;
-}
-.flat-price {
-    font-size: 18px;
-    color: #ffffff;
-}
-</style>
-""", unsafe_allow_html=True)
 
 # ----------------- MAIN TABS -----------------
 tab1, tab2, tab3, tab4 = st.tabs(["🏗️ Ongoing Projects", "🏠 Completed Projects", "📝 Enquiry Form", "📞 Contact Info"])
@@ -212,23 +184,20 @@ with tab1:
         st.markdown(f"📍 **Location:** {data['location']}")
         st.markdown(f"🏠 **Address:** {data['address']}")
         st.markdown(f"🧭 [View on Google Maps]({data['map_link']})")
-
         st.markdown("### 🏡 Available Flats:")
         for flat in data["flats"]:
-            st.markdown(
-                f"""
-                <div class='flat-card'>
-                    <div class='flat-type'>🏠 {flat['type']}</div>
-                    <div class='flat-price'>📏 {flat['area']} | 💰 {flat['price']} | 🟢 {flat['status']}</div>
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
+            st.markdown(f"• {flat['type']} — {flat['area']} — {flat['price']} ({flat['status']})")
+        st.markdown("---")
 
-        if st.button(f"📅 Book a Visit for {name}", key=f"visit_{name}"):
-            st.session_state["selected_project"] = name
-            st.success(f"Redirecting to enquiry form for {name}... Go to the 📝 Enquiry Form tab below 👇")
-
+# ----------------- COMPLETED PROJECTS -----------------
+with tab2:
+    st.subheader("🏠 Completed Projects")
+    for p in completed_projects:
+        st.image(p["image"], caption=p["name"], use_column_width=True)
+        st.markdown(f"🏢 **Project:** {p['name']}")
+        st.markdown(f"📍 **Location:** {p['location']}")
+        st.markdown(f"🏠 **Address:** {p['address']}")
+        st.markdown(f"🧭 [View on Google Maps]({p['map_link']})")
         st.markdown("---")
 
 # ----------------- ENQUIRY FORM -----------------
@@ -240,14 +209,10 @@ with tab3:
     if not os.path.exists(excel_path):
         pd.DataFrame(columns=["Name", "Phone", "Project", "Message", "Timestamp"]).to_excel(excel_path, index=False)
 
-    selected_project = st.session_state.get("selected_project", None)
-    project = st.selectbox("Select Project", list(projects.keys()) + [p["name"] for p in completed_projects],
-                           index=(list(projects.keys()) + [p["name"] for p in completed_projects]).index(selected_project)
-                           if selected_project else 0)
-
     with st.form("enquiry_form"):
         name = st.text_input("Full Name")
         phone = st.text_input("Phone Number")
+        project = st.selectbox("Select Project", list(projects.keys()) + [p["name"] for p in completed_projects])
         message = st.text_area("Additional Message (optional)")
         submit = st.form_submit_button("Submit Enquiry")
 
@@ -273,68 +238,3 @@ with tab4:
     👤 **Owner:** Parasana Ramesh Marathe   
     """)
     st.caption("© 2025 Marathe Group | Designed and Developed by Marathe Group 💻")
-
-# ----------------- FLOATING CONTACT BUTTON -----------------
-st.markdown("""
-<style>
-@keyframes pulse {
-  0% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.6); }
-  70% { box-shadow: 0 0 0 25px rgba(255, 215, 0, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0); }
-}
-.floating-btn {
-    position: fixed;
-    width: 70px;
-    height: 70px;
-    bottom: 25px;
-    right: 25px;
-    background: linear-gradient(135deg, #FFD700, #ffcc00);
-    color: black;
-    border-radius: 50%;
-    text-align: center;
-    font-size: 32px;
-    animation: pulse 2s infinite;
-    z-index: 999;
-    cursor: pointer;
-}
-.contact-options {
-    position: fixed;
-    bottom: 100px;
-    right: 35px;
-    z-index: 998;
-    display: none;
-}
-.contact-options a {
-    display: block;
-    background-color: white;
-    color: black;
-    padding: 8px 12px;
-    border-radius: 8px;
-    margin-bottom: 8px;
-    text-decoration: none;
-    font-weight: 500;
-    box-shadow: 0px 4px 10px rgba(0,0,0,0.3);
-}
-.contact-options a:hover {
-    background-color: #FFD700;
-}
-</style>
-
-<div class="floating-btn" id="contactBtn">📞</div>
-
-<div class="contact-options" id="contactOptions">
-    <a href="https://wa.me/917045871101" target="_blank">💬 WhatsApp</a>
-    <a href="tel:+917045871101">📲 Call Now</a>
-    <a href="mailto:marathegroup1101@gmail.com">✉️ Email</a>
-</div>
-
-<script>
-const btn = document.getElementById('contactBtn');
-const options = document.getElementById('contactOptions');
-let isVisible = false;
-btn.addEventListener('click', () => {
-    options.style.display = isVisible ? 'none' : 'block';
-    isVisible = !isVisible;
-});
-</script>
-""", unsafe_allow_html=True)
