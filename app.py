@@ -200,10 +200,9 @@ with tab4:
     📞 **Contact Number:** +91 7045871101  
     💬 **WhatsApp:** [Chat Now](https://wa.me/917045871101)  
     ✉️ **Email:** marathegroup1101@gmail.com  
-    👤 **Owner:** Parasana Ramesh Marathe  
-    👥 **Manager:**  Padma Rajendra Rawat  
+    👤 **Owner:** Parasana Ramesh Marathe   
     """)
-    st.caption("© 2025 Marathe Group | Designed and Developed by Ritika Rawat 💻")
+    st.caption("© 2025 Marathe Group | Designed and Developed by Marathe Group 💻")
 
 # ----------------- ADMIN PORTAL -----------------
 with tab5:
