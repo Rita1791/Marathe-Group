@@ -6,60 +6,34 @@ import os
 # ----------------- PAGE CONFIGURATION -----------------
 st.set_page_config(page_title="Marathe Group", page_icon="🏢", layout="wide")
 
-# ----------------- HEADER -----------------
+# ----------------- HEADER WITH LOGO -----------------
 st.markdown("""
-    <div style="text-align:center;">
-        <img src="https://raw.githubusercontent.com/Rita1791/Marathe-Group/main/images/Marathe_Group_Logo.webp" width="220">
-        <h1>🏢 Marathe Group</h1>
+    <div style="text-align:center; padding-top: 10px;">
+        <img src="https://github.com/Rita1791/Marathe-Group/blob/main/images/Marathe%20Group%20Logo.webp?raw=true"
+             width="240"
+             style="border-radius:15px; box-shadow: 0px 0px 25px rgba(255,215,0,0.6); margin-bottom:10px;">
+        <h1 style="font-family: 'Trebuchet MS', sans-serif; color:#FFD700; text-shadow: 1px 1px 5px black;">
+            🏢 Marathe Group
+        </h1>
         <h4 style="color:gray;">Luxury Living • Trusted Legacy</h4>
     </div>
 """, unsafe_allow_html=True)
-st.image(
-    "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1600&q=80",
-    use_column_width=True,
-    caption="Building Dreams Since 1985"
-)
+
 st.markdown("---")
 
-# ----------------- MARATHE ELENZA PROMO SECTION -----------------
+# ----------------- MARATHE ELENZA PROMO VIDEO -----------------
 st.markdown("""
-<style>
-.home-section {
-    text-align: center;
-    padding: 30px 0;
-}
-.video-box {
-    border-radius: 20px;
-    overflow: hidden;
-    box-shadow: 0px 4px 25px rgba(255, 215, 0, 0.4);
-    margin-top: 15px;
-}
-.audio-player {
-    display: none;
-}
-.fadeIn {
-    animation: fadeIn 2s ease-in-out;
-}
-@keyframes fadeIn {
-    from {opacity: 0;}
-    to {opacity: 1;}
-}
-</style>
-""", unsafe_allow_html=True)
-
-st.markdown("""
-<div class="home-section fadeIn">
-    <h2 style="color:#FFD700;">✨ Marathe Elenza — Elevating Luxury Living ✨</h2>
-    <div class="video-box">
-        <video width="100%" height="auto" autoplay loop muted playsinline>
-            <source src="https://raw.githubusercontent.com/Rita1791/Marathe-Group/main/images/MG_Video.mp4" type="video/mp4">
+    <div style="text-align:center;">
+        <h2 style="color:#FFD700; font-family:'Georgia'; text-shadow:0px 0px 8px rgba(255,215,0,0.8);">
+            ✨ Marathe Elenza — Elevating Luxury Living ✨
+        </h2>
+        <video width="85%" height="auto" autoplay loop muted playsinline 
+               style="border-radius:20px; box-shadow:0px 0px 25px rgba(255,215,0,0.6); margin-top:15px;">
+            <source src="https://github.com/Rita1791/Marathe-Group/raw/refs/heads/main/images/MG%20Video.mp4" type="video/mp4">
             Your browser does not support the video tag.
         </video>
+        <p style="color:gray; font-style:italic; margin-top:8px;">Experience luxury living — redefining elegance & comfort.</p>
     </div>
-    <audio autoplay loop class="audio-player">
-        <source src="https://cdn.pixabay.com/audio/2022/02/15/audio_28a23d0e8b.mp3" type="audio/mpeg">
-    </audio>
-</div>
 """, unsafe_allow_html=True)
 
 st.markdown("---")
@@ -102,18 +76,19 @@ st.markdown("""
     <div class="icon">🏗️</div>
     <div class="mission-title">Our Mission</div>
     <div class="mission-text">
-        To build homes that redefine comfort, quality, and elegance — delivering unmatched value through trust, innovation, and transparency. 
+        To build homes that redefine comfort, quality, and elegance — delivering unmatched value through trust, innovation, and transparency.
         Every project we create blends design excellence with long-lasting craftsmanship for families to cherish for generations.
     </div>
     <br>
     <div class="icon">🌍</div>
     <div class="mission-title">Our Vision</div>
     <div class="mission-text">
-        To become a name synonymous with trust and excellence in India’s real estate sector by crafting landmark spaces that enrich lives, 
+        To become a name synonymous with trust and excellence in India’s real estate sector by crafting landmark spaces that enrich lives,
         inspire communities, and reflect modern living with a timeless essence.
     </div>
 </div>
 """, unsafe_allow_html=True)
+
 st.markdown("---")
 
 # ----------------- PROJECT DATA -----------------
@@ -198,6 +173,10 @@ with tab2:
         st.markdown(f"📍 **Location:** {p['location']}")
         st.markdown(f"🏠 **Address:** {p['address']}")
         st.markdown(f"🧭 [View on Google Maps]({p['map_link']})")
+        if "flats" in p:
+            st.markdown("### 💰 Available Flats:")
+            for flat in p["flats"]:
+                st.markdown(f"• {flat['type']} — {flat['area']} — {flat['price']} ({flat['status']})")
         st.markdown("---")
 
 # ----------------- ENQUIRY FORM -----------------
@@ -207,7 +186,7 @@ with tab3:
 
     excel_path = "enquiries.xlsx"
     if not os.path.exists(excel_path):
-        pd.DataFrame(columns=["Name", "Phone", "Project", "Message", "Timestamp"]).to_excel(excel_path, index=False)
+        pd.DataFrame(columns=["Name","Phone","Project","Message","Timestamp"]).to_excel(excel_path, index=False)
 
     with st.form("enquiry_form"):
         name = st.text_input("Full Name")
@@ -219,22 +198,31 @@ with tab3:
         if submit:
             if name and phone:
                 df = pd.read_excel(excel_path)
-                new_entry = pd.DataFrame([[name, phone, project, message, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")]],
-                                         columns=df.columns)
+                new_entry = pd.DataFrame([[name, phone, project, message,
+                                           datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")]], columns=df.columns)
                 df = pd.concat([df, new_entry], ignore_index=True)
                 df.to_excel(excel_path, index=False)
                 st.success(f"✅ Thank you {name}! Your enquiry for **{project}** has been recorded.")
             else:
                 st.error("⚠️ Please enter both Name and Phone Number.")
 
+    st.markdown("---")
+    st.markdown("<h3 style='text-align:center;'>🔐 Admin Access – Enquiry Records</h3>", unsafe_allow_html=True)
+    admin_pass = st.text_input("Enter Admin Password:", type="password")
+    if admin_pass == "Marathe@Admin2025":
+        with open(excel_path, "rb") as f:
+            st.download_button("📥 Download Enquiries Excel File", f, file_name="enquiries.xlsx")
+    elif admin_pass != "":
+        st.error("❌ Incorrect password.")
+
 # ----------------- CONTACT INFO -----------------
 with tab4:
     st.subheader("📞 Contact Information")
-    st.markdown("""  
-    ⏰ **Working Hours:** 10:00 AM – 07:00 PM (Mon – Sun)  
+    st.markdown("""
+    ⏰ **Working Hours:** 10:00 AM – 07:00 PM (Mon–Sun)  
     📞 **Contact Number:** +91 7045871101  
     💬 **WhatsApp:** [Chat Now](https://wa.me/917045871101)  
     ✉️ **Email:** marathegroup1101@gmail.com  
-    👤 **Owner:** Parasana Ramesh Marathe   
+    👤 **Owner:** Parasana Ramesh Marathe
     """)
     st.caption("© 2025 Marathe Group | Designed and Developed by Marathe Group 💻")
