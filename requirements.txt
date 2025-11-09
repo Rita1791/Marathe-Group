@@ -1,5 +1,4 @@
 streamlit
 pandas
 openpyxl
-gspread             # optional (only if you enable Google Sheets)
-oauth2client        # optional (for Google Sheets)
+bcrypt
