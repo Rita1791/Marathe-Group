@@ -6,249 +6,186 @@ import os
 # ----------------- PAGE CONFIGURATION -----------------
 st.set_page_config(page_title="Marathe Group", page_icon="🏢", layout="wide")
 
-# ----------------- HEADER WITH LOGO -----------------
+# ----------------- CUSTOM STYLES -----------------
 st.markdown("""
-    <div style="text-align:center; padding-top: 10px;">
-        <img src="https://github.com/Rita1791/Marathe-Group/blob/main/images/Marathe%20Group%20Logo.webp?raw=true"
-             width="240"
-             style="border-radius:15px; box-shadow: 0px 0px 25px rgba(255,215,0,0.6); margin-bottom:10px;">
-        <h1 style="font-family: 'Trebuchet MS', sans-serif; color:#FFD700; text-shadow: 1px 1px 5px black;">
-            🏢 Marathe Group
-        </h1>
-        <h4 style="color:gray;">Luxury Living • Trusted Legacy</h4>
-    </div>
+    <style>
+    body {
+        font-family: 'Poppins', sans-serif;
+        background-color: #0b0b0b;
+        color: white;
+    }
+    .navbar {
+        position: fixed; top:0; left:0; width:100%;
+        background: rgba(20,20,20,0.95);
+        padding: 15px 0;
+        z-index: 999;
+        text-align:center;
+        border-bottom: 1px solid rgba(255,215,0,0.3);
+    }
+    .navbar a {
+        text-decoration:none;
+        color:#FFD700;
+        margin:0 25px;
+        font-weight:600;
+        font-size:16px;
+        transition:0.3s;
+    }
+    .navbar a:hover { color:white; }
+    .hero { text-align:center; margin-top:90px; padding:40px 10px;
+        background:linear-gradient(to bottom,#1a1a1a,#0b0b0b);}
+    .hero h1{color:#FFD700;font-size:50px;text-shadow:1px 1px 10px rgba(255,215,0,0.8);}
+    .hero h4{color:gray;font-size:20px;font-weight:300;}
+    h2{color:#FFD700;text-align:center;margin-top:60px;}
+    .card{background:#141414;border:1px solid rgba(255,215,0,0.3);
+        border-radius:15px;padding:20px;margin-bottom:30px;
+        box-shadow:0px 0px 15px rgba(255,215,0,0.2);}
+    .floating-btn{position:fixed;bottom:25px;right:25px;z-index:999;}
+    .floating-btn a{
+        display:block;margin-top:10px;text-decoration:none;
+        background:linear-gradient(45deg,#FFD700,#b59410);
+        color:black;font-weight:bold;padding:12px 18px;border-radius:50px;
+        box-shadow:0px 0px 10px rgba(255,215,0,0.6);text-align:center;
+        transition:all 0.3s ease-in-out;}
+    .floating-btn a:hover{background:white;color:black;
+        box-shadow:0px 0px 20px rgba(255,215,0,0.9);transform:scale(1.05);}
+    </style>
 """, unsafe_allow_html=True)
 
-st.markdown("---")
-
-# ----------------- MARATHE ELENZA PROMO VIDEO -----------------
+# ----------------- NAVBAR -----------------
 st.markdown("""
-    <div style="text-align:center;">
-        <h2 style="color:#FFD700; font-family:'Georgia'; text-shadow:0px 0px 8px rgba(255,215,0,0.8);">
-            ✨ Marathe Elenza — Elevating Luxury Living ✨
-        </h2>
-        <video width="85%" height="auto" autoplay loop muted playsinline 
-               style="border-radius:20px; box-shadow:0px 0px 25px rgba(255,215,0,0.6); margin-top:15px;">
-            <source src="https://github.com/Rita1791/Marathe-Group/raw/refs/heads/main/images/MG%20Video.mp4" type="video/mp4">
-            Your browser does not support the video tag.
-        </video>
-        <p style="color:gray; font-style:italic; margin-top:8px;">Experience luxury living — redefining elegance & comfort.</p>
-    </div>
-""", unsafe_allow_html=True)
-
-st.markdown("---")
-
-# ----------------- MISSION & VISION -----------------
-st.markdown("""
-<style>
-.mission-vision-box {
-    background: linear-gradient(135deg, #1f1f1f, #2a2a2a);
-    padding: 40px;
-    border-radius: 15px;
-    color: white;
-    box-shadow: 0px 0px 20px rgba(255, 215, 0, 0.3);
-    border: 1px solid rgba(255, 215, 0, 0.4);
-}
-.mission-title {
-    color: #FFD700;
-    font-size: 28px;
-    font-weight: bold;
-    text-align: center;
-    margin-bottom: 10px;
-}
-.mission-text {
-    font-size: 18px;
-    color: #f0f0f0;
-    text-align: justify;
-    line-height: 1.6;
-}
-.icon {
-    font-size: 35px;
-    text-align: center;
-    display: block;
-    margin-bottom: 10px;
-}
-</style>
-
-<h2 style="text-align:center; color:#FFD700;">🌟 Our Mission & Vision</h2>
-
-<div class="mission-vision-box">
-    <div class="icon">🏗️</div>
-    <div class="mission-title">Our Mission</div>
-    <div class="mission-text">
-        To build homes that redefine comfort, quality, and elegance — delivering unmatched value through trust, innovation, and transparency.
-        Every project we create blends design excellence with long-lasting craftsmanship for families to cherish for generations.
-    </div>
-    <br>
-    <div class="icon">🌍</div>
-    <div class="mission-title">Our Vision</div>
-    <div class="mission-text">
-        To become a name synonymous with trust and excellence in India’s real estate sector by crafting landmark spaces that enrich lives,
-        inspire communities, and reflect modern living with a timeless essence.
-    </div>
+<div class="navbar">
+    <a href="#home">Home</a>
+    <a href="#projects">Projects</a>
+    <a href="#enquiry">Enquiry</a>
+    <a href="#portal">Customer Portal</a>
+    <a href="#gallery">Gallery</a>
+    <a href="#contact">Contact</a>
 </div>
 """, unsafe_allow_html=True)
 
+# ----------------- HERO -----------------
+st.markdown("""
+<div id="home" class="hero">
+    <img src="https://github.com/Rita1791/Marathe-Group/blob/main/images/Marathe%20Group%20Logo.webp?raw=true"
+         width="250" style="border-radius:15px; margin-bottom:20px;">
+    <h1>🏢 Marathe Group</h1>
+    <h4>Luxury Living • Trusted Legacy</h4>
+</div>
+""", unsafe_allow_html=True)
+st.video("https://github.com/Rita1791/Marathe-Group/raw/refs/heads/main/images/MG%20Video.mp4")
+
+st.markdown("<p style='text-align:center;color:gray;'>Building trust and timeless spaces since 1995.</p>", unsafe_allow_html=True)
 st.markdown("---")
 
-# ----------------- PROJECT DATA -----------------
+# ----------------- PROJECTS -----------------
+st.markdown("<h2 id='projects'>🏗️ Our Projects</h2>", unsafe_allow_html=True)
 projects = {
-    "Marathe Sapphire": {
-        "location": "Titwala (E)",
-        "address": "Swami Vivekanand Chowk Road, Titwala East, Maharashtra",
-        "map_link": "https://www.google.com/maps?q=Marathe+Sapphire+Titwala",
-        "image": "https://raw.githubusercontent.com/Rita1791/Marathe-Group/refs/heads/main/images/Marathe%20Sapphire.avif",
-        "flats": [
-            {"type": "1 BHK", "area": "650 sq.ft", "price": "₹38 Lakh (Incl. Taxes)", "status": "Available"},
-            {"type": "2 BHK", "area": "950 sq.ft", "price": "₹55 Lakh (Incl. Taxes)", "status": "Available"},
-        ]
-    },
-    "Marathe Tower": {
-        "location": "Titwala (E)",
-        "address": "Digi1 Road, Titwala East, Maharashtra",
-        "map_link": "https://www.google.com/maps?q=Marathe+Tower+Titwala",
-        "image": "https://github.com/Rita1791/Marathe-Group/blob/main/images/Marathe%20Tower.jpg?raw=true",
-        "flats": [
-            {"type": "1 BHK", "area": "620 sq.ft", "price": "₹32 Lakh + Taxes", "status": "Available"},
-            {"type": "2 BHK", "area": "910 sq.ft", "price": "₹45 Lakh + Taxes", "status": "Available"},
-        ]
-    },
-    "Marathe Pride": {
-        "location": "Ambernath (E)",
-        "address": "Plot No. 220 & 221, Ambernath East, Maharashtra",
-        "map_link": "https://www.google.com/maps?q=Marathe+Pride+Ambernath",
-        "image": "https://raw.githubusercontent.com/Rita1791/Marathe-Group/refs/heads/main/images/Marathe%20Pride.avif",
-        "flats": [
-            {"type": "1 BHK", "area": "640 sq.ft", "price": "₹32 Lakh + Taxes", "status": "Available"},
-            {"type": "2 BHK", "area": "900 sq.ft", "price": "₹47 Lakh + Taxes", "status": "Available"},
-        ]
-    }
+    "Marathe Sapphire": "₹38 L (Inc Taxes) – 1 BHK | ₹55 L (Inc Taxes) – 2 BHK",
+    "Marathe Pride": "₹32 L + Taxes – 1 BHK | ₹47 L + Taxes – 2 BHK",
+    "Marathe Tower": "₹32 L – 1 BHK | ₹45 L – 2 BHK",
+    "Marathe Elenza": "₹90 L – 2 BHK | ₹1.2 Cr – 3 BHK"
 }
-
-completed_projects = [
-    {"name": "Marathe Elenza", "location": "Shahad (W)", "address": "Sales Office, Shahad West, Maharashtra",
-     "map_link": "https://www.google.com/maps?q=Marathe+Elenza+Shahad",
-     "image": "https://github.com/Rita1791/Marathe-Group/blob/main/images/Marathe%20Elenza.jpeg?raw=true",
-     "flats": [
-        {"type": "2 BHK", "area": "1100 sq.ft", "price": "₹90 Lakh", "status": "Available"},
-        {"type": "3 BHK", "area": "1450 sq.ft", "price": "₹1.2 Crore", "status": "Available"},
-     ]},
-    {"name": "Marathe Empire", "location": "Titwala (E)", "address": "Near Mahaganpati Hospital, Titwala East, Maharashtra",
-     "map_link": "https://www.google.com/maps?q=Marathe+Empire+Titwala",
-     "image": "https://github.com/Rita1791/Marathe-Group/blob/main/images/Marathe%20Empire.jpg?raw=true"},
-    {"name": "Marathe Height", "location": "Titwala (E)", "address": "Near Ghar Aangan, Titwala East, Maharashtra",
-     "map_link": "https://www.google.com/maps?q=Marathe+Height+Titwala",
-     "image": "https://github.com/Rita1791/Marathe-Group/blob/main/images/marathe%20Height.png?raw=true"},
-    {"name": "Marathe Fortune", "location": "Titwala (E)", "address": "Ganesh Mandir Road, Titwala East, Maharashtra",
-     "map_link": "https://www.google.com/maps?q=Marathe+Fortune+Titwala",
-     "image": "https://raw.githubusercontent.com/Rita1791/Marathe-Group/refs/heads/main/images/Marathe%20Fortune.avif"},
-    {"name": "Marathe Empress", "location": "Titwala (E)", "address": "Jagat Naka, Titwala East, Maharashtra",
-     "map_link": "https://www.google.com/maps?q=Marathe+Empress+Titwala",
-     "image": "https://github.com/Rita1791/Marathe-Group/blob/main/images/Marathe%20Empress.webp?raw=true"},
-]
-
-# ----------------- SESSION TRACKER -----------------
-if "selected_project" not in st.session_state:
-    st.session_state.selected_project = None
-if "goto_form" not in st.session_state:
-    st.session_state.goto_form = False
-
-# ----------------- MAIN TABS -----------------
-tab1, tab2, tab3, tab4 = st.tabs(["🏗️ Ongoing Projects", "🏠 Completed Projects", "📝 Enquiry Form", "📞 Contact Info"])
-
-# ----------------- ONGOING PROJECTS -----------------
-with tab1:
-    st.subheader("🏗️ Ongoing Projects")
-    for name, data in projects.items():
-        st.image(data["image"], caption=name, use_column_width=True)
-        st.markdown(f"🏢 **Project:** {name}")
-        st.markdown(f"📍 **Location:** {data['location']}")
-        st.markdown(f"🏠 **Address:** {data['address']}")
-        st.markdown(f"🧭 [View on Google Maps]({data['map_link']})")
-        st.markdown("### 🏡 Available Flats:")
-        for flat in data["flats"]:
-            st.markdown(f"• {flat['type']} — {flat['area']} — {flat['price']} ({flat['status']})")
-
-        # Book Now Button (gold style)
-        if st.button(f"💛 Book Now at {name}", key=f"book_{name}"):
-            st.session_state.selected_project = name
-            st.session_state.goto_form = True
-            st.success(f"Redirecting to Enquiry Form for {name}...")
-
-        st.markdown("---")
-
-# ----------------- COMPLETED PROJECTS -----------------
-with tab2:
-    st.subheader("🏠 Completed Projects")
-    for p in completed_projects:
-        st.image(p["image"], caption=p["name"], use_column_width=True)
-        st.markdown(f"🏢 **Project:** {p['name']}")
-        st.markdown(f"📍 **Location:** {p['location']}")
-        st.markdown(f"🏠 **Address:** {p['address']}")
-        st.markdown(f"🧭 [View on Google Maps]({p['map_link']})")
-        if "flats" in p:
-            st.markdown("### 💰 Available Flats:")
-            for flat in p["flats"]:
-                st.markdown(f"• {flat['type']} — {flat['area']} — {flat['price']} ({flat['status']})")
-        st.markdown("---")
+for project, price in projects.items():
+    st.markdown(f"""
+    <div class="card">
+        <h3 style="color:#FFD700;">{project}</h3>
+        <p style="color:#ccc;">{price}</p>
+        <a href="#enquiry" style="color:#FFD700;font-weight:bold;">💛 Book Now</a>
+    </div>
+    """, unsafe_allow_html=True)
 
 # ----------------- ENQUIRY FORM -----------------
-with tab3:
-    st.subheader("📝 Flat Enquiry Form")
-    st.write("Please fill the form below and our team will contact you soon:")
+st.markdown("<h2 id='enquiry'>📝 Enquiry Form</h2>", unsafe_allow_html=True)
+excel_path="enquiries.xlsx"
+if not os.path.exists(excel_path):
+    pd.DataFrame(columns=["Name","Phone","Project","Message","Timestamp"]).to_excel(excel_path,index=False)
+with st.form("enquiry"):
+    n=st.text_input("Full Name")
+    ph=st.text_input("Phone Number")
+    proj=st.selectbox("Select Project",list(projects.keys()))
+    msg=st.text_area("Additional Message")
+    sub=st.form_submit_button("Submit Enquiry")
+    if sub:
+        if n and ph:
+            df=pd.read_excel(excel_path)
+            df.loc[len(df)] = [n,ph,proj,msg,datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")]
+            df.to_excel(excel_path,index=False)
+            st.success(f"✅ Thank you {n}! Your enquiry for {proj} is recorded.")
+        else: st.error("⚠️ Please fill all required fields.")
+st.markdown("---")
 
-    excel_path = "enquiries.xlsx"
-    if not os.path.exists(excel_path):
-        pd.DataFrame(columns=["Name","Phone","Project","Message","Timestamp"]).to_excel(excel_path, index=False)
+# ----------------- CUSTOMER PORTAL -----------------
+st.markdown("<h2 id='portal'>👤 Customer Portal</h2>", unsafe_allow_html=True)
+path="customer_users.xlsx"
+if not os.path.exists(path):
+    pd.DataFrame(columns=["Name","Email","Password","Project","Approved"]).to_excel(path,index=False)
+tab1,tab2=st.tabs(["Login","Register"])
+with tab2:
+    nm=st.text_input("Full Name",key="nm")
+    em=st.text_input("Email ID",key="em")
+    pw=st.text_input("Set Password",type="password",key="pw")
+    pj=st.selectbox("Your Project",list(projects.keys()),key="pj")
+    if st.button("Register"):
+        df=pd.read_excel(path)
+        df.loc[len(df)]=[nm,em,pw,pj,"Pending"]
+        df.to_excel(path,index=False)
+        st.success("✅ Registration submitted! Office will verify soon.")
+with tab1:
+    le=st.text_input("Email",key="le")
+    lp=st.text_input("Password",type="password",key="lp")
+    if st.button("Login"):
+        df=pd.read_excel(path)
+        user=df[(df["Email"]==le)&(df["Password"]==lp)]
+        if not user.empty:
+            if user["Approved"].iloc[0]=="Yes":
+                st.success(f"Welcome {user['Name'].iloc[0]} 👋")
+                st.markdown(f"🏢 Project: **{user['Project'].iloc[0]}**")
+                st.markdown("<h3 style='color:#FFD700;'>📊 Dashboard</h3>",unsafe_allow_html=True)
+                st.progress(80)
+                col1,col2=st.columns(2)
+                with col1:
+                    st.markdown("<div class='card'><b>💰 Payment Status</b><br>Paid: ₹45 L  |  Pending: ₹10 L<br>Next Due: Dec 2025</div>",unsafe_allow_html=True)
+                with col2:
+                    st.markdown("<div class='card'><b>📄 Documents</b><br><a href='https://example.com/agreement.pdf' target='_blank'>Agreement</a><br><a href='https://example.com/receipt.pdf' target='_blank'>Receipts</a></div>",unsafe_allow_html=True)
+                st.markdown("<div class='card'><b>🏗️ Construction Update</b><br>Flooring work in progress – Handover expected April 2026.</div>",unsafe_allow_html=True)
+                st.markdown("<div class='card'><b>🧾 Service Request</b></div>",unsafe_allow_html=True)
+                q=st.text_area("Describe your issue:")
+                if st.button("Submit Request"): st.success("✅ Your request has been submitted.")
+            else: st.warning("⏳ Awaiting office approval.")
+        else: st.error("❌ Invalid credentials.")
 
-    default_project = st.session_state.selected_project if st.session_state.selected_project else list(projects.keys())[0]
+# ----------------- GALLERY -----------------
+st.markdown("<h2 id='gallery'>📸 Project Gallery</h2>", unsafe_allow_html=True)
+st.image([
+    "https://images.unsplash.com/photo-1560185008-5b12a1e0e27d",
+    "https://images.unsplash.com/photo-1600585154340-be6161a56a0c",
+    "https://images.unsplash.com/photo-1600607687920-4e24d07d1c07"
+], caption=["Elenza Exterior","Luxury Interiors","Amenities Zone"], use_column_width=True)
+st.video("https://github.com/Rita1791/Marathe-Group/raw/refs/heads/main/images/MG%20Video.mp4")
 
-    with st.form("enquiry_form"):
-        name = st.text_input("Full Name")
-        phone = st.text_input("Phone Number")
-        project = st.selectbox("Select Project", list(projects.keys()) + [p["name"] for p in completed_projects],
-                               index=list(projects.keys()).index(default_project)
-                               if default_project in projects else 0)
-        message = st.text_area("Additional Message (optional)")
-        submit = st.form_submit_button("Submit Enquiry")
+# ----------------- AI CHATBOT (Simple) -----------------
+st.markdown("<h2 style='color:#FFD700;'>🤖 Ask Marathe AI</h2>", unsafe_allow_html=True)
+prompt = st.text_input("Ask anything about Marathe Group projects:")
+if prompt:
+    st.write("💬 Marathe AI:", "We’re here to assist you! Our sales team will contact you shortly.")
 
-        if submit:
-            if name and phone:
-                df = pd.read_excel(excel_path)
-                new_entry = pd.DataFrame([[name, phone, project, message,
-                                           datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")]], columns=df.columns)
-                df = pd.concat([df, new_entry], ignore_index=True)
-                df.to_excel(excel_path, index=False)
-                st.success(f"✅ Thank you {name}! Your enquiry for **{project}** has been recorded.")
-            else:
-                st.error("⚠️ Please enter both Name and Phone Number.")
+# ----------------- CONTACT -----------------
+st.markdown("<h2 id='contact'>📞 Contact Us</h2>", unsafe_allow_html=True)
+st.markdown("""
+<div class='card'>
+<p>⏰ <b>Hours:</b> 10 AM–7 PM</p>
+<p>📞 <b>Phone:</b> +91 7045871101</p>
+<p>💬 <b>WhatsApp:</b> <a href='https://wa.me/917045871101' target='_blank' style='color:#FFD700;'>Chat Now</a></p>
+<p>✉️ <b>Email:</b> marathegroup1101@gmail.com</p>
+<p>👤 <b>Owner:</b> Parasana Ramesh Marathe</p>
+</div>
+<p style='text-align:center;color:gray;'>© 2025 Marathe Group | Designed by Ritika Rawat 💻</p>
+""", unsafe_allow_html=True)
 
-    # Auto-scroll to this form
-    if st.session_state.goto_form:
-        st.markdown("""
-            <script>
-                window.parent.document.querySelector('section.main').scrollTo({top: 1200, behavior: 'smooth'});
-            </script>
-        """, unsafe_allow_html=True)
-        st.session_state.goto_form = False
-
-    st.markdown("---")
-    st.markdown("<h3 style='text-align:center;'>🔐 Admin Access – Enquiry Records</h3>", unsafe_allow_html=True)
-    admin_pass = st.text_input("Enter Admin Password:", type="password")
-    if admin_pass == "Marathe@Admin2025":
-        with open(excel_path, "rb") as f:
-            st.download_button("📥 Download Enquiries Excel File", f, file_name="enquiries.xlsx")
-    elif admin_pass != "":
-        st.error("❌ Incorrect password.")
-
-# ----------------- CONTACT INFO -----------------
-with tab4:
-    st.subheader("📞 Contact Information")
-    st.markdown("""
-    ⏰ **Working Hours:** 10:00 AM – 07:00 PM (Mon–Sun)  
-    📞 **Contact Number:** +91 7045871101  
-    💬 **WhatsApp:** [Chat Now](https://wa.me/917045871101)  
-    ✉️ **Email:** marathegroup1101@gmail.com  
-    👤 **Owner:** Parasana Ramesh Marathe
-    """)
-    st.caption("© 2025 Marathe Group | Designed and Developed by Marathe Group 💻")
+# ----------------- FLOATING BUTTONS -----------------
+st.markdown("""
+<div class='floating-btn'>
+    <a href='#enquiry'>📩 Enquiry</a>
+    <a href='https://wa.me/917045871101' target='_blank'>💬 WhatsApp</a>
+</div>
+""", unsafe_allow_html=True)
