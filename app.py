@@ -17,12 +17,6 @@ body {
 h1, h2, h3 {
     color: #FFD700;
 }
-hr {
-    border: 1px solid rgba(255,215,0,0.3);
-}
-button {
-    border-radius: 10px;
-}
 .project-card {
     background: linear-gradient(145deg, #1a1a1a, #141414);
     border-radius: 15px;
@@ -42,41 +36,68 @@ button {
     padding: 10px 25px;
     border-radius: 12px;
     text-align: center;
-    transition: all 0.3s ease;
 }
 .book-btn:hover {
     background: linear-gradient(90deg, #ffcc00, #ffe680);
     box-shadow: 0px 0px 15px rgba(255, 215, 0, 0.6);
     transform: scale(1.05);
 }
-.footer {
-    text-align: center;
-    font-size: 13px;
-    color: #999;
-    margin-top: 20px;
+.popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.85);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+.popup video {
+    border-radius: 20px;
+    width: 70%;
+    box-shadow: 0px 0px 30px rgba(255,215,0,0.6);
+}
+.close-btn {
+    position: absolute;
+    top: 50px;
+    right: 80px;
+    background: #FFD700;
+    color: black;
+    padding: 10px 18px;
+    border-radius: 50px;
+    cursor: pointer;
+    font-weight: bold;
 }
 </style>
 """, unsafe_allow_html=True)
 
-# ----------------- HEADER SECTION -----------------
+# ----------------- HEADER -----------------
 st.markdown("""
     <div style="text-align:center;">
         <img src="https://github.com/Rita1791/Marathe-Group/blob/main/images/Marathe%20Group%20Logo.webp?raw=true"
              width="200" style="border-radius:20px; margin-bottom:15px;">
-        <h1 style="font-family:'Trebuchet MS';">🏢 Marathe Group</h1>
+        <h1>🏢 Marathe Group</h1>
         <h4 style="color:#ccc;">Luxury Living • Trusted Legacy</h4>
     </div>
 """, unsafe_allow_html=True)
 
-st.video("https://github.com/Rita1791/Marathe-Group/raw/refs/heads/main/images/MG%20Video.mp4")
+# ----------------- POPUP VIDEO -----------------
+if "video_closed" not in st.session_state:
+    st.session_state.video_closed = False
 
-st.markdown("""
-<p style="text-align:center; font-style:italic; color:gray;">
-Marathe Elenza — Where Luxury Meets Lifestyle ✨
-</p>
-""", unsafe_allow_html=True)
+if not st.session_state.video_closed:
+    st.markdown(f"""
+    <div class="popup" id="popup">
+        <div class="close-btn" onclick="document.getElementById('popup').style.display='none';">✖</div>
+        <video autoplay muted playsinline>
+            <source src="https://github.com/Rita1791/Marathe-Group/raw/refs/heads/main/images/MG%20Video.mp4" type="video/mp4">
+        </video>
+    </div>
+    """, unsafe_allow_html=True)
 
-st.markdown("---")
+st.markdown("<hr>", unsafe_allow_html=True)
 
 # ----------------- MISSION & VISION -----------------
 st.markdown("""
@@ -90,7 +111,7 @@ bringing families closer to their dream lifestyle.
 </div>
 """, unsafe_allow_html=True)
 
-st.markdown("---")
+st.markdown("<hr>", unsafe_allow_html=True)
 
 # ----------------- PROJECT DETAILS -----------------
 projects = {
@@ -127,17 +148,16 @@ for i, (name, data) in enumerate(projects.items()):
             <img src='{data["image"]}' style='width:100%; border-radius:10px; margin-bottom:10px;'>
             <h3 style='color:#FFD700; text-align:center;'>{name}</h3>
             <p style='text-align:center; color:#bbb;'>📍 {data["location"]}<br>🏠 {data["address"]}</p>
-            <p><b>Flat Options:</b></p>
-            """, unsafe_allow_html=True)
+        """, unsafe_allow_html=True)
         for flat, price in data["flats"]:
             st.markdown(f"<p>• {flat} — <b>{price}</b></p>", unsafe_allow_html=True)
         st.markdown(f"<a href='{data['map']}' target='_blank' style='color:#FFD700;'>🧭 View on Google Maps</a>", unsafe_allow_html=True)
-        if st.button(f"💛 Book Now", key=f"book_{name}"):
+        if st.button(f"💛 Book Now ({name})", key=f"book_{name}"):
             st.session_state["selected_project"] = name
-            st.success(f"Scroll down to the enquiry form for {name}!")
+            st.success(f"Scroll down to Enquiry Form for {name}")
         st.markdown("</div>", unsafe_allow_html=True)
 
-st.markdown("---")
+st.markdown("<hr>", unsafe_allow_html=True)
 
 # ----------------- ENQUIRY FORM -----------------
 st.header("📝 Enquiry Form")
@@ -166,7 +186,7 @@ with st.form("enquiry_form"):
             st.error("⚠️ Please fill in all required fields.")
 
 # ----------------- ADMIN DOWNLOAD -----------------
-st.markdown("---")
+st.markdown("<hr>", unsafe_allow_html=True)
 st.markdown("<h3 style='text-align:center;'>🔐 Admin Access – Download Enquiries</h3>", unsafe_allow_html=True)
 admin_pass = st.text_input("Enter Admin Password:", type="password")
 if admin_pass == "Marathe@Admin2025":
@@ -176,7 +196,7 @@ elif admin_pass != "":
     st.error("❌ Incorrect password.")
 
 # ----------------- CONTACT SECTION -----------------
-st.markdown("---")
+st.markdown("<hr>", unsafe_allow_html=True)
 st.header("📞 Contact Us")
 st.markdown("""
 📍 **Address:** Marathe Group Office, Titwala (E), Maharashtra  
@@ -185,4 +205,4 @@ st.markdown("""
 ✉️ **Email:** marathegroup1101@gmail.com  
 👤 **Owner:** Parasana Ramesh Marathe  
 """)
-st.markdown("<div class='footer'>© 2025 Marathe Group | Designed & Developed by Ritika Rawat 💻</div>", unsafe_allow_html=True)
+st.caption("© 2025 Marathe Group | Designed & Developed by Ritika Rawat 💻")
