@@ -1,4 +1,4 @@
-# app.py
+# app.py - Marathe Group (Professional)
 import streamlit as st
 import pandas as pd
 import datetime
@@ -6,27 +6,14 @@ import os
 import random
 import smtplib
 from email.message import EmailMessage
-import hashlib
+import bcrypt
 import time
-import json
+import hashlib
 
-# ---------------- CONFIG ----------------
-st.set_page_config(page_title="Marathe Group | Secure Portal", page_icon="🏢", layout="wide")
+# ---------------- Page config ----------------
+st.set_page_config(page_title="Marathe Group — Luxury Living", page_icon="🏢", layout="wide")
 
-# ---------- USER CONFIG ----------
-# Replace with your SMTP sender email and app password (Gmail app password recommended)
-EMAIL_USER = st.secrets.get("EMAIL_USER", "")   # put in Streamlit Cloud secrets (recommended)
-EMAIL_PASS = st.secrets.get("EMAIL_PASS", "")   # put in Streamlit Cloud secrets
-
-# Optional Google Sheets sync (set SERVICE_ACCOUNT_JSON in secrets or provide file path)
-GOOGLE_SHEETS_ENABLED = False  # set to True to enable
-
-# OTP settings
-OTP_EXPIRY_SECONDS = 300      # 5 minutes
-OTP_RATE_LIMIT_WINDOW = 300   # seconds window to limit sends
-OTP_RATE_LIMIT_MAX = 5        # max OTP sends per email per window
-
-# Storage paths
+# ----------------- Constants & Paths -----------------
 DATA_DIR = "."
 UPLOAD_DIR = os.path.join(DATA_DIR, "uploads")
 os.makedirs(UPLOAD_DIR, exist_ok=True)
@@ -35,309 +22,346 @@ ADMIN_FILE = os.path.join(DATA_DIR, "admins.xlsx")
 CUSTOMER_FILE = os.path.join(DATA_DIR, "customers.xlsx")
 BOOKING_FILE = os.path.join(DATA_DIR, "bookings.xlsx")
 
-# initialize files if missing
-def ensure_xlsx(path, cols):
+# OTP / security settings
+OTP_EXPIRY_SECONDS = 300   # 5 minutes
+OTP_MAX_PER_WINDOW = 5
+OTP_WINDOW_SECONDS = 300
+
+# defaults used (you can change)
+OFFICE_ADDRESS = "Swami Vivekanand Chowk, Titwala (E), Maharashtra"
+SENDER_EMAIL = st.secrets.get("EMAIL_USER", "")
+SENDER_PASS = st.secrets.get("EMAIL_PASS", "")
+
+# ----------------- Helpers: storage init -----------------
+def ensure(path, cols):
     if not os.path.exists(path):
         pd.DataFrame(columns=cols).to_excel(path, index=False)
 
-ensure_xlsx(ADMIN_FILE, ["Name", "Email", "PasswordHash", "Approved", "CreatedAt"])
-ensure_xlsx(CUSTOMER_FILE, ["Name", "Email", "PasswordHash", "Project", "Approved", "CreatedAt"])
-ensure_xlsx(BOOKING_FILE, ["CustomerEmail", "Project", "Date", "Status", "FileName", "FilePath"])
+ensure(ADMIN_FILE, ["Name","Email","PasswordHash","Approved","CreatedAt"])
+ensure(CUSTOMER_FILE, ["Name","Email","PasswordHash","Project","Approved","CreatedAt"])
+ensure(BOOKING_FILE, ["CustomerEmail","Project","Date","Status","FileName","FilePath"])
 
-# ---------- OTP store & rate limit in session ----------
+# ----------------- Session stores -----------------
 if "otp_store" not in st.session_state:
-    # otp_store: { email: {"otp": "...", "ts": 1234567890 } }
-    st.session_state["otp_store"] = {}
-
+    # { email: {"otp": "...", "ts": epoch } }
+    st.session_state.otp_store = {}
 if "otp_rate" not in st.session_state:
-    # otp_rate: { email: [timestamp1, timestamp2, ...] }
-    st.session_state["otp_rate"] = {}
+    st.session_state.otp_rate = {}  # { email: [timestamps] }
 
-# ---------- Password helpers ----------
-def hash_password(plain):
-    return hashlib.sha256(plain.encode("utf-8")).hexdigest()
+# ----------------- Utility: bcrypt password helpers -----------------
+def hash_password_bcrypt(password: str) -> str:
+    return bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
 
-def verify_password(plain, hashed):
-    return hash_password(plain) == hashed
-
-# ---------- Email (HTML OTP) ----------
-def send_otp_email(receiver_email, otp, purpose="Verification"):
-    """
-    Sends a nice HTML OTP email. Uses EMAIL_USER and EMAIL_PASS.
-    Returns True on success.
-    """
-    if not EMAIL_USER or not EMAIL_PASS:
-        st.error("EMAIL_USER / EMAIL_PASS not configured. Put them in Streamlit secrets.")
-        return False
-    msg = EmailMessage()
-    msg["Subject"] = f"Marathe Group — {purpose} OTP"
-    msg["From"] = EMAIL_USER
-    msg["To"] = receiver_email
-
-    html = f"""
-    <html>
-      <body style="font-family: Arial, sans-serif; color:#111;">
-        <div style="max-width:600px; margin:auto; padding:20px; border-radius:10px; background:linear-gradient(180deg,#fff,#f7f7f7);">
-          <h2 style="color:#b8860b; margin:0 0 10px 0;">Marathe Group — OTP</h2>
-          <p style="margin:8px 0;">Hello,</p>
-          <p style="margin:8px 0;">Your <strong>{purpose}</strong> OTP is:</p>
-          <div style="font-size:28px; font-weight:700; color:#000; letter-spacing:4px; margin:12px 0;">{otp}</div>
-          <p style="font-size:13px; color:#444; margin:8px 0;">This code will expire in {OTP_EXPIRY_SECONDS//60} minutes. If you didn't request this, ignore this email.</p>
-          <hr>
-          <p style="font-size:12px; color:#666; margin:6px 0;">Marathe Group • Trusted Legacy</p>
-        </div>
-      </body>
-    </html>
-    """
-    msg.add_alternative(html, subtype="html")
+def verify_password_bcrypt(password: str, hashed: str) -> bool:
     try:
+        return bcrypt.checkpw(password.encode(), hashed.encode())
+    except:
+        return False
+
+# ----------------- Utility: send OTP via SMTP (HTML) -----------------
+def send_otp_email(recipient: str, otp: str, purpose: str = "Verification") -> bool:
+    if not SENDER_EMAIL or not SENDER_PASS:
+        st.error("Email sender not configured. Add EMAIL_USER and EMAIL_PASS to Streamlit secrets.")
+        return False
+    try:
+        msg = EmailMessage()
+        msg["Subject"] = f"Marathe Group — {purpose} OTP"
+        msg["From"] = SENDER_EMAIL
+        msg["To"] = recipient
+        html = f"""
+        <html>
+          <body style="font-family:Arial,Helvetica,sans-serif;color:#111;">
+            <div style="padding:20px;border-radius:10px;background:#fff;">
+              <h2 style="color:#b8860b;margin:0">Marathe Group — {purpose} OTP</h2>
+              <p>Hello,</p>
+              <p>Your OTP is:</p>
+              <div style="font-size:28px;font-weight:700;color:#000">{otp}</div>
+              <p style="color:#555">This OTP expires in {OTP_EXPIRY_SECONDS//60} minutes. If you did not request this, ignore.</p>
+              <hr/>
+              <small style="color:#777">Marathe Group • {OFFICE_ADDRESS}</small>
+            </div>
+          </body>
+        </html>
+        """
+        msg.add_alternative(html, subtype="html")
         with smtplib.SMTP_SSL("smtp.gmail.com", 465) as smtp:
-            smtp.login(EMAIL_USER, EMAIL_PASS)
+            smtp.login(SENDER_EMAIL, SENDER_PASS)
             smtp.send_message(msg)
         return True
     except Exception as e:
-        st.error(f"SMTP send failed: {e}")
+        st.error(f"Failed to send OTP email: {e}")
         return False
 
-# ---------- OTP helpers ----------
-def can_send_otp(email):
-    """Simple rate-limit check"""
+# ----------------- OTP helpers -----------------
+def can_send_otp(email: str) -> bool:
     now = time.time()
-    events = st.session_state["otp_rate"].get(email, [])
-    # drop older than window
-    events = [t for t in events if now - t <= OTP_RATE_LIMIT_WINDOW]
-    st.session_state["otp_rate"][email] = events
-    return len(events) < OTP_RATE_LIMIT_MAX
+    events = st.session_state.otp_rate.get(email, [])
+    # prune
+    events = [t for t in events if now - t <= OTP_WINDOW_SECONDS]
+    st.session_state.otp_rate[email] = events
+    return len(events) < OTP_MAX_PER_WINDOW
 
-def store_otp(email, otp):
-    st.session_state["otp_store"][email] = {"otp": otp, "ts": time.time()}
-    st.session_state["otp_rate"].setdefault(email, []).append(time.time())
+def store_otp(email: str, otp: str):
+    st.session_state.otp_store[email] = {"otp": otp, "ts": time.time()}
+    st.session_state.otp_rate.setdefault(email, []).append(time.time())
 
-def verify_and_consume_otp(email, otp):
-    rec = st.session_state["otp_store"].get(email)
+def verify_otp(email: str, otp: str):
+    rec = st.session_state.otp_store.get(email)
     if not rec:
-        return False, "No OTP sent"
+        return False, "No OTP requested."
     if time.time() - rec["ts"] > OTP_EXPIRY_SECONDS:
-        st.session_state["otp_store"].pop(email, None)
-        return False, "OTP expired"
+        st.session_state.otp_store.pop(email, None)
+        return False, "OTP expired."
     if rec["otp"] != otp:
-        return False, "Incorrect OTP"
-    # valid:
-    st.session_state["otp_store"].pop(email, None)
+        return False, "Incorrect OTP."
+    st.session_state.otp_store.pop(email, None)
     return True, "OK"
 
-# ---------- Optional: Google Sheets sync (outline) ----------
-def sync_row_to_google_sheets(sheet_name, row_values):
-    """
-    Optional: sync a row to Google Sheets.
-    To enable:
-      - set GOOGLE_SHEETS_ENABLED = True
-      - add service account JSON contents into st.secrets["GSPREAD_SERVICE_ACCOUNT"] as a JSON string
-    """
-    if not GOOGLE_SHEETS_ENABLED:
-        return False
-    try:
-        import gspread
-        from oauth2client.service_account import ServiceAccountCredentials
-        creds_json = st.secrets.get("GSPREAD_SERVICE_ACCOUNT")
-        if not creds_json:
-            st.error("Google Sheets service account not found in secrets.")
-            return False
-        creds_dict = json.loads(creds_json)
-        scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-        creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
-        client = gspread.authorize(creds)
-        sheet = client.open(sheet_name).sheet1
-        sheet.append_row(row_values)
-        return True
-    except Exception as e:
-        st.error(f"Google Sheets sync failed: {e}")
-        return False
-
-# ---------- PROJECT DATA ----------
+# ----------------- Projects data -----------------
 projects = {
-    "Marathe Sapphire": {"img": "https://raw.githubusercontent.com/Rita1791/Marathe-Group/refs/heads/main/images/Marathe%20Sapphire.avif", "price": "₹38–55 Lakh"},
-    "Marathe Tower": {"img": "https://github.com/Rita1791/Marathe-Group/blob/main/images/Marathe%20Tower.jpg?raw=true", "price": "₹32–45 Lakh"},
-    "Marathe Pride": {"img": "https://raw.githubusercontent.com/Rita1791/Marathe-Group/refs/heads/main/images/Marathe%20Pride.avif", "price": "₹32–47 Lakh"},
-    "Marathe Elenza": {"img": "https://github.com/Rita1791/Marathe-Group/blob/main/images/Marathe%20Elenza.jpeg?raw=true", "price": "₹90 L – 1.2 Cr"},
+    "Marathe Sapphire": {
+        "location": "Titwala (E)",
+        "address": "Swami Vivekanand Chowk Road, Titwala East",
+        "image": "https://raw.githubusercontent.com/Rita1791/Marathe-Group/refs/heads/main/images/Marathe%20Sapphire.avif",
+        "price": "1 BHK ₹38L | 2 BHK ₹55L",
+        "brochure": "docs/Marathe_Sapphire_brochure.pdf"
+    },
+    "Marathe Tower": {
+        "location": "Titwala (E)",
+        "address": "Digi1 Road, Titwala East",
+        "image": "https://github.com/Rita1791/Marathe-Group/blob/main/images/Marathe%20Tower.jpg?raw=true",
+        "price": "1 BHK ₹32L | 2 BHK ₹45L",
+        "brochure": "docs/Marathe_Tower_brochure.pdf"
+    },
+    "Marathe Pride": {
+        "location": "Ambernath (E)",
+        "address": "Plot No. 220 & 221, Ambernath East",
+        "image": "https://raw.githubusercontent.com/Rita1791/Marathe-Group/refs/heads/main/images/Marathe%20Pride.avif",
+        "price": "1 BHK ₹32L | 2 BHK ₹47L",
+        "brochure": "docs/Marathe_Pride_brochure.pdf"
+    },
+    "Marathe Elenza": {
+        "location": "Shahad (W)",
+        "address": "Sales Office, Shahad West, Maharashtra",
+        "image": "https://github.com/Rita1791/Marathe-Group/blob/main/images/Marathe%20Elenza.jpeg?raw=true",
+        "price": "2 BHK ₹90L | 3 BHK ₹1.2Cr",
+        "brochure": "docs/Marathe_Elenza_brochure.pdf"
+    }
 }
 
-# ---------- STYLE & HEADER ----------
-st.markdown("""
-<style>
-body { background-color: #050505; color: #fff; }
-h1,h2 { color: #FFD700; }
-.card { background: linear-gradient(145deg,#121212,#0f0f0f); padding:15px; border-radius:12px; box-shadow:0 6px 18px rgba(255,215,0,0.08); }
-.carousel { width:100%; max-width:1100px; margin:auto; }
-.carousel img { width:100%; height:320px; object-fit:cover; border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,0.6); }
-.btn { background: linear-gradient(90deg,#FFD700,#ffb700); color: black; padding:8px 16px; border-radius:10px; font-weight:600; }
-.small { color:#ccc; font-size:13px; }
-</style>
-""", unsafe_allow_html=True)
+# ----------------- CSS Styling (premium) -----------------
+st.markdown(
+    """
+    <style>
+    :root { --gold: #FFD700; --muted: #bfbfbf; }
+    body { background: #050505; color: #fff; }
+    .hero { text-align:center; padding:24px; }
+    .card { background: linear-gradient(145deg,#111,#0e0e0e); padding:18px; border-radius:14px; box-shadow:0 8px 30px rgba(255,215,0,0.06); margin-bottom:18px; }
+    .project-img { border-radius:10px; box-shadow: 0 6px 25px rgba(0,0,0,0.6); width:100%; height:220px; object-fit:cover; }
+    .cta { background: linear-gradient(90deg,var(--gold), #ffb700); color: #000; padding:10px 18px; border-radius:10px; font-weight:700; text-decoration:none;}
+    .muted { color: #bfbfbf; font-size:13px; }
+    .nav { display:flex; gap:18px; justify-content:center; align-items:center; margin-bottom:8px; }
+    .footer { text-align:center; color:#9b9b9b; font-size:13px; padding:20px 0; }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 
-st.markdown("""
-<div style="text-align:center;">
-  <img src="https://github.com/Rita1791/Marathe-Group/blob/main/images/Marathe%20Group%20Logo.webp?raw=true" width="180" style="border-radius:12px; box-shadow:0 6px 30px rgba(255,215,0,0.12);">
-  <h1>Marathe Group</h1>
-  <div class="small">Luxury Living • Trusted Legacy</div>
+# ----------------- Header / Navbar -----------------
+logo_url = "https://github.com/Rita1791/Marathe-Group/blob/main/images/Marathe%20Group%20Logo.webp?raw=true"
+st.markdown(f"""
+<div class="hero">
+  <img src="{logo_url}" width="160" style="border-radius:14px; box-shadow:0 10px 30px rgba(255,215,0,0.08);" />
+  <h1 style="margin:6px 0; color:var(--gold)">Marathe Group</h1>
+  <div class="muted">Luxury Living • Trusted Legacy</div>
 </div>
 """, unsafe_allow_html=True)
 
+st.markdown("<div class='nav'><a href='#home' class='muted'>Home</a> | <a href='#projects' class='muted'>Projects</a> | <a href='#about' class='muted'>About</a> | <a href='#contact' class='muted'>Contact</a></div>", unsafe_allow_html=True)
 st.markdown("---")
 
-# ---------- Image carousel (simple) ----------
-carousel_images = [projects[k]["img"] for k in projects]
-carousel_html = "<div class='carousel'>"
-for src in carousel_images:
-    carousel_html += f"<img src='{src}'/>"
-carousel_html += "</div>"
-# Show carousel images stacked (browser will show all; simple effect). For advanced carousel, JS would be needed.
-st.markdown(carousel_html, unsafe_allow_html=True)
-st.markdown("---")
+# ----------------- Layout: main content + sidebar -----------------
+sidebar_choice = st.sidebar.selectbox("Menu", ["Home", "Projects", "Customer Portal", "Admin Portal", "Contact"])
 
-# ---------- Sidebar navigation ----------
-menu = st.sidebar.selectbox("Menu", ["Home", "Customer Portal", "Admin Portal", "Contact"])
-
-# ---------- HOME ----------
-if menu == "Home":
-    st.header("Our Projects")
+# ----------------- Home Page -----------------
+if sidebar_choice == "Home":
+    st.header("Welcome to Marathe Group")
+    st.markdown("<p class='muted'>Premium residential & commercial developments across Mumbai's growing suburbs.</p>", unsafe_allow_html=True)
+    # Show hero image (use Elenza image as hero)
+    st.image(projects["Marathe Elenza"]["image"], use_column_width=True, caption="Marathe Elenza — Elegance redefined")
+    st.markdown("---")
+    st.subheader("Featured Projects")
     cols = st.columns(2)
-    for i, (name, info) in enumerate(projects.items()):
+    for i, (name, data) in enumerate(projects.items()):
         with cols[i % 2]:
-            st.markdown(f"<div class='card'>", unsafe_allow_html=True)
-            st.image(info["img"], use_column_width=True)
-            st.markdown(f"### <span style='color:#FFD700'>{name}</span>", unsafe_allow_html=True)
-            st.markdown(f"<div class='small'>Price: {info['price']}</div>", unsafe_allow_html=True)
+            st.markdown("<div class='card'>", unsafe_allow_html=True)
+            st.image(data["image"], use_column_width=True, caption=name, output_format="auto")
+            st.markdown(f"**{name}**  \n\n{data['location']}  \n\n**Price:** {data['price']}")
+            # Brochure download (if exists in repo docs/)
+            if os.path.exists(data["brochure"]):
+                with open(data["brochure"], "rb") as f:
+                    st.download_button(f"📄 Download Brochure — {name}", f, file_name=os.path.basename(data["brochure"]), key=f"bro_{name}")
+            else:
+                # placeholder link to repo path — users can add PDF later
+                st.markdown(f"<a class='cta' href='{data['brochure']}' target='_blank'>📄 Download Brochure</a>", unsafe_allow_html=True)
+            if st.button(f"💛 Book Site Visit — {name}", key=f"book_{name}"):
+                st.session_state["preselect_project"] = name
+                st.success(f"Go to Customer Portal → Register to book {name}")
             st.markdown("</div>", unsafe_allow_html=True)
-    st.info("To book: go to Customer Portal → Register. Admin will verify your registration and enable document access after booking.")
 
-# ---------- CUSTOMER PORTAL ----------
-elif menu == "Customer Portal":
+# ----------------- Projects page -----------------
+elif sidebar_choice == "Projects":
+    st.header("All Projects")
+    for name, info in projects.items():
+        st.markdown("<div class='card'>", unsafe_allow_html=True)
+        cols = st.columns([1,2])
+        with cols[0]:
+            st.image(info["image"], use_column_width=True)
+        with cols[1]:
+            st.markdown(f"### <span style='color:var(--gold)'>{name}</span>", unsafe_allow_html=True)
+            st.markdown(f"**Location:** {info['location']}")
+            st.markdown(f"**Address:** {info['address']}")
+            st.markdown(f"**Price:** {info['price']}")
+            # Google maps link
+            q = "+".join(info['address'].split())
+            maps = f"https://www.google.com/maps/search/?api=1&query={q}"
+            st.markdown(f"[🧭 View on Google Maps]({maps})")
+            # Brochure
+            if os.path.exists(info["brochure"]):
+                with open(info["brochure"], "rb") as f:
+                    st.download_button(f"📄 Download Brochure — {name}", f, file_name=os.path.basename(info["brochure"]), key=f"pb_{name}")
+            else:
+                st.markdown(f"<a class='cta' href='{info['brochure']}' target='_blank'>📄 Download Brochure</a>", unsafe_allow_html=True)
+            if st.button(f"💛 Book Site Visit — {name}", key=f"pbk_{name}"):
+                st.session_state["preselect_project"] = name
+                st.success(f"Go to Customer Portal → Register to book {name}")
+        st.markdown("</div>", unsafe_allow_html=True)
+
+# ----------------- Customer Portal -----------------
+elif sidebar_choice == "Customer Portal":
     st.header("Customer Portal")
     df_customers = pd.read_excel(CUSTOMER_FILE)
     df_bookings = pd.read_excel(BOOKING_FILE)
 
     tabs = st.tabs(["Register", "Login", "Forgot Password", "My Documents"])
 
-    # ---- Register ----
+    # ----- Register -----
     with tabs[0]:
-        st.subheader("Register")
-        name = st.text_input("Full Name", key="cust_reg_name")
-        email = st.text_input("Email", key="cust_reg_email")
-        password = st.text_input("Set Password", type="password", key="cust_reg_pass")
-        project = st.selectbox("Project to Book", list(projects.keys()), key="cust_reg_proj")
+        st.subheader("Register (Customer)")
+        r_name = st.text_input("Full Name", key="cust_reg_name")
+        r_email = st.text_input("Email", key="cust_reg_email")
+        r_pass = st.text_input("Set Password", type="password", key="cust_reg_pass")
+        pre_proj = st.session_state.get("preselect_project", None)
+        r_project = st.selectbox("Project to Book", list(projects.keys()), index=list(projects.keys()).index(pre_proj) if pre_proj in projects else 0, key="cust_reg_proj")
         if st.button("Send OTP", key="cust_send_otp"):
-            if not (name and email and password):
-                st.error("Fill Name, Email and Password first")
+            if not (r_name and r_email and r_pass):
+                st.error("Please fill Name, Email, Password.")
             else:
-                if not can_send_otp(email):
-                    st.error("Too many OTP requests. Try again later.")
+                if not can_send_otp(r_email):
+                    st.error("OTP rate limit reached. Try after some time.")
                 else:
-                    otp = str(random.randint(100000, 999999))
-                    ok = send_otp_email(email, otp, purpose="Customer Registration")
+                    otp = f"{random.randint(100000,999999)}"
+                    ok = send_otp_email(r_email, otp, purpose="Customer Registration")
                     if ok:
-                        store_otp(email, otp)
-                        st.success("OTP sent to your email. Enter it below.")
-        otp_input = st.text_input("Enter OTP", key="cust_reg_otp")
+                        store_otp(r_email, otp)
+                        st.success("OTP sent to your email. Enter it below to verify.")
+        r_otp = st.text_input("Enter OTP", key="cust_reg_otp")
         if st.button("Verify & Register", key="cust_verify"):
-            ok, msg = verify_and_consume_otp(email, otp_input)
+            ok, msg = verify_otp(r_email, r_otp)
             if ok:
-                hashed = hash_password(password)
-                df_customers.loc[len(df_customers)] = [name, email, hashed, project, "Pending", datetime.datetime.now().isoformat()]
+                hashed = hash_password_bcrypt(r_pass)
+                df_customers.loc[len(df_customers)] = [r_name, r_email, hashed, r_project, "Pending", datetime.datetime.now().isoformat()]
                 df_customers.to_excel(CUSTOMER_FILE, index=False)
-                # optional sheets
-                if GOOGLE_SHEETS_ENABLED:
-                    sync_row_to_google_sheets("MaratheRegistry", [name, email, project, "Pending", datetime.datetime.now().isoformat()])
-                st.success("Registered. Await admin approval.")
+                st.success("Registration submitted. Admin will verify and approve your account.")
             else:
                 st.error(msg)
 
-    # ---- Login ----
+    # ----- Login -----
     with tabs[1]:
-        st.subheader("Login")
-        email = st.text_input("Email", key="cust_login_email")
-        password = st.text_input("Password", type="password", key="cust_login_pass")
+        st.subheader("Customer Login")
+        l_email = st.text_input("Email", key="cust_login_email")
+        l_pass = st.text_input("Password", type="password", key="cust_login_pass")
         if st.button("Login", key="cust_login_btn"):
-            user = df_customers[df_customers["Email"] == email]
-            if user.empty:
+            df_customers = pd.read_excel(CUSTOMER_FILE)  # refresh
+            row = df_customers[df_customers["Email"] == l_email]
+            if row.empty:
                 st.error("Email not registered.")
             else:
-                if verify_password(password, user.iloc[0]["PasswordHash"]):
-                    if user.iloc[0]["Approved"] == "Yes":
-                        st.success(f"Welcome {user.iloc[0]['Name']}")
-                        # show bookings/documents
-                        my_docs = df_bookings[df_bookings["CustomerEmail"] == email]
+                if verify_password_bcrypt(l_pass, row.iloc[0]["PasswordHash"]):
+                    if row.iloc[0]["Approved"] == "Yes":
+                        st.success(f"Welcome {row.iloc[0]['Name']}!")
+                        # show bookings & documents
+                        my_docs = df_bookings[df_bookings["CustomerEmail"] == l_email]
                         st.subheader("My Bookings & Documents")
                         if my_docs.empty:
-                            st.info("No documents yet; contact office.")
+                            st.info("No documents uploaded yet by admin.")
                         else:
-                            for idx, row in my_docs.iterrows():
-                                st.markdown(f"**{row['Project']}** — {row['Status']} ({row['Date']})")
-                                fp = row.get("FilePath")
+                            for idx, r in my_docs.iterrows():
+                                st.markdown(f"**{r['Project']}** — {r['Status']} ({r['Date']})")
+                                fp = r.get("FilePath")
                                 if pd.notna(fp) and os.path.exists(str(fp)):
-                                    with open(fp, "rb") as f:
-                                        st.download_button(f"Download {row['FileName']}", f, file_name=row['FileName'], key=f"dl_{idx}")
+                                    with open(fp, "rb") as fh:
+                                        st.download_button(f"Download {r['FileName']}", fh, file_name=r['FileName'], key=f"dl_{idx}")
                                 else:
-                                    st.markdown("_No file available._")
+                                    st.markdown("_Document not available._")
                     else:
-                        st.warning("Registration pending admin approval.")
+                        st.warning("Your registration is pending approval by the office.")
                 else:
                     st.error("Incorrect password.")
 
-    # ---- Forgot Password ----
+    # ----- Forgot password -----
     with tabs[2]:
         st.subheader("Forgot Password")
-        fp_email = st.text_input("Enter your registered email", key="fp_email")
-        if st.button("Send OTP for Reset", key="fp_send"):
-            user = df_customers[df_customers["Email"] == fp_email]
-            if user.empty:
+        fp_email = st.text_input("Enter registered email", key="fp_email")
+        if st.button("Send Reset OTP", key="fp_send"):
+            df_customers = pd.read_excel(CUSTOMER_FILE)
+            if df_customers[df_customers["Email"] == fp_email].empty:
                 st.error("Email not registered.")
             else:
                 if not can_send_otp(fp_email):
-                    st.error("Too many OTP requests. Try later.")
+                    st.error("OTP rate limit reached.")
                 else:
-                    otp = str(random.randint(100000, 999999))
+                    otp = f"{random.randint(100000,999999)}"
                     if send_otp_email(fp_email, otp, purpose="Password Reset"):
                         store_otp(fp_email, otp)
-                        st.success("OTP sent. Enter below.")
+                        st.success("OTP sent. Enter OTP and new password below.")
         fp_otp = st.text_input("Enter OTP", key="fp_otp")
-        new_pass = st.text_input("New Password", type="password", key="fp_newpass")
+        fp_new = st.text_input("New Password", type="password", key="fp_new")
         if st.button("Verify & Reset", key="fp_reset"):
-            ok, msg = verify_and_consume_otp(fp_email, fp_otp)
+            ok, msg = verify_otp(fp_email, fp_otp)
             if ok:
-                df_customers.loc[df_customers["Email"] == fp_email, "PasswordHash"] = hash_password(new_pass)
+                df_customers = pd.read_excel(CUSTOMER_FILE)
+                df_customers.loc[df_customers["Email"] == fp_email, "PasswordHash"] = hash_password_bcrypt(fp_new)
                 df_customers.to_excel(CUSTOMER_FILE, index=False)
                 st.success("Password reset successful.")
             else:
                 st.error(msg)
 
-    # ---- My Documents ----
+    # ----- My Documents quick access -----
     with tabs[3]:
         st.subheader("My Documents")
-        doc_email = st.text_input("Enter your approved email", key="md_email")
+        m_email = st.text_input("Enter your approved email", key="md_email")
         if st.button("Show Documents", key="md_show"):
-            user = df_customers[df_customers["Email"] == doc_email]
-            if user.empty:
+            df_customers = pd.read_excel(CUSTOMER_FILE)
+            if df_customers[df_customers["Email"] == m_email].empty:
                 st.error("Email not registered.")
-            elif user.iloc[0]["Approved"] != "Yes":
-                st.warning("Not approved yet.")
+            elif df_customers[df_customers["Email"] == m_email].iloc[0]["Approved"] != "Yes":
+                st.warning("Your account is not approved yet.")
             else:
-                my_docs = pd.read_excel(BOOKING_FILE)
-                my_docs = my_docs[my_docs["CustomerEmail"] == doc_email]
-                if my_docs.empty:
-                    st.info("No documents.")
+                df_bookings = pd.read_excel(BOOKING_FILE)
+                docs = df_bookings[df_bookings["CustomerEmail"] == m_email]
+                if docs.empty:
+                    st.info("No documents uploaded yet.")
                 else:
-                    for idx, row in my_docs.iterrows():
-                        st.markdown(f"**{row['Project']}** — {row['Status']} ({row['Date']})")
-                        fp = row.get("FilePath")
+                    for idx, r in docs.iterrows():
+                        st.markdown(f"**{r['Project']}** — {r['Status']} ({r['Date']})")
+                        fp = r.get("FilePath")
                         if pd.notna(fp) and os.path.exists(str(fp)):
-                            with open(str(fp), "rb") as f:
-                                st.download_button(f"Download {row['FileName']}", f, file_name=row['FileName'], key=f"md_dl_{idx}")
-                        else:
-                            st.markdown("_No file uploaded._")
+                            with open(str(fp), "rb") as fh:
+                                st.download_button(f"Download {r['FileName']}", fh, file_name=r['FileName'], key=f"md_dl_{idx}")
 
-# ---------- ADMIN PORTAL ----------
-elif menu == "Admin Portal":
+# ----------------- Admin Portal -----------------
+elif sidebar_choice == "Admin Portal":
     st.header("Admin Portal")
     df_admins = pd.read_excel(ADMIN_FILE)
     df_customers = pd.read_excel(CUSTOMER_FILE)
@@ -345,94 +369,98 @@ elif menu == "Admin Portal":
 
     tabs = st.tabs(["Register Admin", "Admin Login"])
 
-    # Register admin (with OTP)
+    # Register admin
     with tabs[0]:
         st.subheader("Register Admin")
-        aname = st.text_input("Full Name", key="adm_reg_name")
-        aemail = st.text_input("Official Email", key="adm_reg_email")
-        apass = st.text_input("Set Password", type="password", key="adm_reg_pass")
-        if st.button("Send OTP to Admin Email", key="adm_send"):
-            if not (aname and aemail and apass):
+        a_name = st.text_input("Full Name", key="adm_reg_name")
+        a_email = st.text_input("Official Email", key="adm_reg_email")
+        a_pass = st.text_input("Set Password", type="password", key="adm_reg_pass")
+        if st.button("Send OTP", key="adm_send"):
+            if not (a_name and a_email and a_pass):
                 st.error("Fill all fields.")
             else:
-                if not can_send_otp(aemail):
-                    st.error("Too many OTP requests.")
+                if not can_send_otp(a_email):
+                    st.error("OTP rate limit reached.")
                 else:
-                    otp = str(random.randint(100000, 999999))
-                    if send_otp_email(aemail, otp, purpose="Admin Registration"):
-                        store_otp(aemail, otp)
+                    otp = f"{random.randint(100000,999999)}"
+                    if send_otp_email(a_email, otp, purpose="Admin Registration"):
+                        store_otp(a_email, otp)
                         st.success("OTP sent.")
         adm_otp = st.text_input("Enter OTP", key="adm_otp")
         if st.button("Verify & Register Admin", key="adm_verify"):
-            ok, msg = verify_and_consume_otp(aemail, adm_otp)
+            ok, msg = verify_otp(a_email, adm_otp)
             if ok:
-                df_admins.loc[len(df_admins)] = [aname, aemail, hash_password(apass), "Pending", datetime.datetime.now().isoformat()]
+                hashed = hash_password_bcrypt(a_pass)
+                df_admins.loc[len(df_admins)] = [a_name, a_email, hashed, "Pending", datetime.datetime.now().isoformat()]
                 df_admins.to_excel(ADMIN_FILE, index=False)
-                st.success("Admin registered. Office must approve.")
+                st.success("Admin registration submitted — office will verify.")
             else:
                 st.error(msg)
 
-    # Admin Login and dashboard
+    # Admin login + dashboard
     with tabs[1]:
-        aemail_login = st.text_input("Admin Email", key="adm_login_email")
-        apass_login = st.text_input("Password", type="password", key="adm_login_pass")
-        if st.button("Admin Login", key="adm_login_btn"):
-            adm = df_admins[df_admins["Email"] == aemail_login]
-            if adm.empty:
+        st.subheader("Admin Login")
+        login_email = st.text_input("Email", key="adm_login_email")
+        login_pass = st.text_input("Password", type="password", key="adm_login_pass")
+        if st.button("Login", key="adm_login_btn"):
+            df_admins = pd.read_excel(ADMIN_FILE)
+            row = df_admins[df_admins["Email"] == login_email]
+            if row.empty:
                 st.error("Admin not registered.")
-            elif not verify_password(apass_login, adm.iloc[0]["PasswordHash"]):
-                st.error("Incorrect password.")
-            elif adm.iloc[0]["Approved"] != "Yes":
-                st.warning("Admin account pending verification.")
             else:
-                st.success(f"Welcome Admin {adm.iloc[0]['Name']}")
-                st.subheader("Pending Customer Approvals")
-                pending = df_customers[df_customers["Approved"] == "Pending"]
-                if not pending.empty:
-                    for idx, row in pending.iterrows():
-                        st.markdown(f"- {row['Name']} • {row['Email']} • {row['Project']}")
-                        if st.button(f"Approve {row['Email']}", key=f"approve_{idx}"):
-                            df_customers.loc[df_customers["Email"] == row["Email"], "Approved"] = "Yes"
-                            df_customers.to_excel(CUSTOMER_FILE, index=False)
-                            st.success(f"Approved {row['Email']}")
+                if verify_password_bcrypt(login_pass, row.iloc[0]["PasswordHash"]):
+                    if row.iloc[0]["Approved"] != "Yes":
+                        st.warning("Admin account pending approval by main office.")
+                    else:
+                        st.success(f"Welcome Admin {row.iloc[0]['Name']}")
+                        # Admin controls
+                        st.subheader("Pending Customer Approvals")
+                        df_customers = pd.read_excel(CUSTOMER_FILE)
+                        pending = df_customers[df_customers["Approved"] == "Pending"]
+                        if pending.empty:
+                            st.info("No pending customer registrations.")
+                        else:
+                            for idx, r in pending.iterrows():
+                                st.markdown(f"- {r['Name']} • {r['Email']} • {r['Project']}")
+                                if st.button(f"Approve {r['Email']}", key=f"approve_{idx}"):
+                                    df_customers.loc[df_customers["Email"] == r['Email'], "Approved"] = "Yes"
+                                    df_customers.to_excel(CUSTOMER_FILE, index=False)
+                                    st.success(f"Approved {r['Email']}")
+
+                        st.markdown("---")
+                        st.subheader("Upload Documents for Customer")
+                        approved = df_customers[df_customers["Approved"] == "Yes"]
+                        if not approved.empty:
+                            sel_email = st.selectbox("Select Customer Email", approved["Email"].tolist(), key="adm_sel_cust")
+                            sel_proj = st.selectbox("Select Project", list(projects.keys()), key="adm_sel_proj")
+                            upfile = st.file_uploader("Choose file (pdf/jpg/png)", type=["pdf","jpg","png"], key="adm_upload")
+                            if upfile and st.button("Upload Document", key="adm_upload_btn"):
+                                cust_dir = os.path.join(UPLOAD_DIR, sel_email.replace("@","_at_"))
+                                os.makedirs(cust_dir, exist_ok=True)
+                                save_path = os.path.join(cust_dir, upfile.name)
+                                with open(save_path, "wb") as fh:
+                                    fh.write(upfile.getbuffer())
+                                # record
+                                df_bookings.loc[len(df_bookings)] = [sel_email, sel_proj, datetime.datetime.now().strftime("%Y-%m-%d"), "Document Uploaded", upfile.name, save_path]
+                                df_bookings.to_excel(BOOKING_FILE, index=False)
+                                st.success("Document uploaded & linked to customer.")
+                        else:
+                            st.info("No approved customers yet.")
+
+                        st.markdown("---")
+                        st.subheader("All Bookings / Documents")
+                        st.dataframe(pd.read_excel(BOOKING_FILE))
                 else:
-                    st.info("No pending customers.")
+                    st.error("Incorrect password.")
 
-                st.markdown("---")
-                st.subheader("Upload Document for Customer")
-                approved = df_customers[df_customers["Approved"] == "Yes"]
-                if not approved.empty:
-                    cust_email = st.selectbox("Select Customer", approved["Email"].tolist(), key="adm_cust_sel")
-                    proj = st.selectbox("Project", list(projects.keys()), key="adm_proj_sel")
-                    uploaded = st.file_uploader("Upload file (pdf/jpg/png)", type=["pdf", "jpg", "png"], key="adm_file")
-                    if uploaded and st.button("Upload Document", key="adm_upload_btn"):
-                        cust_dir = os.path.join(UPLOAD_DIR, cust_email.replace("@", "_at_"))
-                        os.makedirs(cust_dir, exist_ok=True)
-                        save_path = os.path.join(cust_dir, uploaded.name)
-                        with open(save_path, "wb") as f:
-                            f.write(uploaded.getbuffer())
-                        df_bookings.loc[len(df_bookings)] = [cust_email, proj, datetime.datetime.now().strftime("%Y-%m-%d"), "Document Uploaded", uploaded.name, save_path]
-                        df_bookings.to_excel(BOOKING_FILE, index=False)
-                        st.success("Uploaded and linked to customer.")
-                        # optional sheets sync
-                        if GOOGLE_SHEETS_ENABLED:
-                            sync_row_to_google_sheets("MaratheBookings", [cust_email, proj, datetime.datetime.now().strftime("%Y-%m-%d"), "Uploaded", uploaded.name])
-                else:
-                    st.info("No approved customers.")
-
-                st.markdown("---")
-                st.subheader("All Bookings")
-                st.dataframe(pd.read_excel(BOOKING_FILE))
-
-# ---------- CONTACT ----------
-elif menu == "Contact":
+# ----------------- Contact -----------------
+elif sidebar_choice == "Contact":
     st.header("Contact Us")
-    st.markdown("""
-    **Office Address:** Marathe Group Office, Titwala (E), Maharashtra  
-    **Working Hours:** 10:00 AM – 07:00 PM (Mon–Sun)  
-    **Phone:** +91 7045871101  
-    **Email:** marathegroup1101@gmail.com
+    st.markdown(f"""
+    📍 **Address:** {OFFICE_ADDRESS}  
+    ⏰ **Working Hours:** 10:00 AM – 07:00 PM (Mon–Sun)  
+    📞 **Phone:** +91 7045871101  
+    💬 [WhatsApp Chat](https://wa.me/917045871101)  
+    ✉️ **Email:** marathegroup1101@gmail.com
     """)
-
-st.markdown("---")
-st.caption("© 2025 Marathe Group — Secure Portal")
+    st.markdown("<div class='footer'>© 2025 Marathe Group — Designed by Ritika Rawat</div>", unsafe_allow_html=True)
