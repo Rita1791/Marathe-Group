@@ -147,9 +147,11 @@ completed_projects = [
      "image": "https://github.com/Rita1791/Marathe-Group/blob/main/images/Marathe%20Empress.webp?raw=true"},
 ]
 
-# Track selected project (for Book Now)
+# ----------------- SESSION TRACKER -----------------
 if "selected_project" not in st.session_state:
     st.session_state.selected_project = None
+if "goto_form" not in st.session_state:
+    st.session_state.goto_form = False
 
 # ----------------- MAIN TABS -----------------
 tab1, tab2, tab3, tab4 = st.tabs(["🏗️ Ongoing Projects", "🏠 Completed Projects", "📝 Enquiry Form", "📞 Contact Info"])
@@ -167,10 +169,11 @@ with tab1:
         for flat in data["flats"]:
             st.markdown(f"• {flat['type']} — {flat['area']} — {flat['price']} ({flat['status']})")
 
-        # Book Now Button
+        # Book Now Button (gold style)
         if st.button(f"💛 Book Now at {name}", key=f"book_{name}"):
             st.session_state.selected_project = name
-            st.success(f"Redirected to Enquiry Form for {name}")
+            st.session_state.goto_form = True
+            st.success(f"Redirecting to Enquiry Form for {name}...")
 
         st.markdown("---")
 
@@ -203,19 +206,31 @@ with tab3:
     with st.form("enquiry_form"):
         name = st.text_input("Full Name")
         phone = st.text_input("Phone Number")
-        project = st.selectbox("Select Project", list(projects.keys()) + [p["name"] for p in completed_projects], index=list(projects.keys()).index(default_project) if default_project in projects else 0)
+        project = st.selectbox("Select Project", list(projects.keys()) + [p["name"] for p in completed_projects],
+                               index=list(projects.keys()).index(default_project)
+                               if default_project in projects else 0)
         message = st.text_area("Additional Message (optional)")
         submit = st.form_submit_button("Submit Enquiry")
 
         if submit:
             if name and phone:
                 df = pd.read_excel(excel_path)
-                new_entry = pd.DataFrame([[name, phone, project, message, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")]], columns=df.columns)
+                new_entry = pd.DataFrame([[name, phone, project, message,
+                                           datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")]], columns=df.columns)
                 df = pd.concat([df, new_entry], ignore_index=True)
                 df.to_excel(excel_path, index=False)
                 st.success(f"✅ Thank you {name}! Your enquiry for **{project}** has been recorded.")
             else:
                 st.error("⚠️ Please enter both Name and Phone Number.")
+
+    # Auto-scroll to this form
+    if st.session_state.goto_form:
+        st.markdown("""
+            <script>
+                window.parent.document.querySelector('section.main').scrollTo({top: 1200, behavior: 'smooth'});
+            </script>
+        """, unsafe_allow_html=True)
+        st.session_state.goto_form = False
 
     st.markdown("---")
     st.markdown("<h3 style='text-align:center;'>🔐 Admin Access – Enquiry Records</h3>", unsafe_allow_html=True)
