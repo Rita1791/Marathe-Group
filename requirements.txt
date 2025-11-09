@@ -2,3 +2,5 @@ streamlit
 pandas
 openpyxl
 bcrypt
+psycopg2-binary    # only if using Postgres
+boto3              # only if using S3
